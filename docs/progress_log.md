@@ -2,7 +2,7 @@
 
 ---
 
-## Day 1 - Project Setup
+## Project Setup
 
 ### Completed:
 - Created GitHub repository
@@ -16,7 +16,7 @@
 
 ---
 
-## Day 2 - Environment Setup
+## Environment Setup
 
 ### Completed:
 - Created Python virtual environment
@@ -28,7 +28,7 @@
 
 ---
 
-## Day 3 - Camera Stream
+## Camera Stream
 
 ### Completed:
 - Implemented real-time webcam video capture using OpenCV
@@ -40,7 +40,7 @@
 
 ---
 
-## Day 4 - Face Detection
+## Face Detection
 
 ### Completed:
 - Implemented face detection using Haar Cascade classifier
@@ -53,6 +53,27 @@
 ### Outcome:
 - Real-time face detection successfully working
 - Foundation established for further driver monitoring features
+
+---
+
+## Eye Detection + Detection Stability Improvements
+
+### Completed:
+- Implemented eye detection using Haar Cascade within detected face region
+- Optimized detection by restricting eye search to upper face ROI
+- Tuned parameters (`scaleFactor`, `minNeighbors`) to reduce false positives
+- Applied filtering to keep only the most relevant eye detections
+- Improved system stability by reducing multiple/duplicate detections
+
+### Observations:
+- Haar Cascade-based detection works but shows limitations in real-world scenarios:
+  - False positives under head movement and pose variation
+  - Reduced stability during face tilt
+  - Multiple overlapping detections in some frames
+
+### Decision:
+- Identified need for more robust face and landmark detection approach
+- Planned migration from Haar Cascade to MediaPipe for improved accuracy and stability
 
 ---
 
