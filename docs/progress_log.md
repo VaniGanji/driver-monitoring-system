@@ -77,3 +77,14 @@
 
 ---
 
+## Day 6 - MediaPipe Face Detection (real-time AI perception system)
+
+### Completed:
+- Integrated MediaPipe face detection for improved robustness
+- Replaced Haar Cascade for face detection
+- Achieved stable detection under head tilt and pose variation
+
+### Outcome:
+- Reliable real-time face detection suitable for DMS applications
+
+---

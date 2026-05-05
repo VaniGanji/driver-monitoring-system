@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
+import mediapipe as mp
 
+print("MediaPipe workingversion:", mp.__version__)
 print("OpenCV version:", cv2.__version__)
 print("NumPy version:", np.__version__)
 
