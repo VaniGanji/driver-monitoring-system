@@ -77,7 +77,7 @@
 
 ---
 
-## Day 6 - MediaPipe Face Detection (real-time AI perception system)
+## MediaPipe Face Detection (real-time AI perception system)
 
 ### Completed:
 - Integrated MediaPipe face detection for improved robustness
@@ -86,5 +86,24 @@
 
 ### Outcome:
 - Reliable real-time face detection suitable for DMS applications
+
+---
+
+## Eye Landmark Extraction + EAR Calculation
+
+### Completed:
+- Integrated MediaPipe Face Mesh landmarks into drowsiness detection pipeline
+- Extracted left and right eye landmark coordinates using predefined landmark indices
+- Implemented Eye Aspect Ratio (EAR) calculation using Euclidean distance
+- Calculated vertical and horizontal eye distances for eye openness estimation
+- Combined left and right eye EAR values for stable eye-state monitoring
+- Displayed real-time EAR values on video stream
+
+### Outcome:
+- Successfully built foundational eye-state monitoring logic for Driver Monitoring System (DMS)
+- Established core pipeline for blink and drowsiness detection
+
+### Current Pipeline:
+Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calculation → Real-time Eye State Monitoring
 
 ---
