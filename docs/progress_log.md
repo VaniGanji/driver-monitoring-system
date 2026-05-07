@@ -107,3 +107,19 @@
 Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calculation → Real-time Eye State Monitoring
 
 ---
+
+## Drowsiness Detection Logic
+
+### Completed:
+- Implemented EAR threshold-based eye closure detection
+- Added consecutive frame monitoring for temporal drowsiness analysis
+- Integrated real-time drowsiness alert system
+- Displayed visual alert during prolonged eye closure
+
+### Outcome:
+- Successfully implemented core drowsiness detection functionality for DMS
+
+### Current Pipeline:
+Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calculation → Temporal Eye Closure Monitoring → Drowsiness Alert
+
+---

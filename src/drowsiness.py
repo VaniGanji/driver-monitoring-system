@@ -53,6 +53,10 @@ def calculate_ear(landmarks, eye_indices, w, h):
 
 cap = cv2.VideoCapture(0)
 
+EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
+CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
+closed_frames = 0.  # Counter variable for consecutive closed eye frames
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -78,6 +82,24 @@ while True:
             # Display EAR
             cv2.putText(frame, f"EAR: {avg_ear:.2f}", (30, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            
+            # Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame.
+            if avg_ear < EAR_THRESHOLD:
+                closed_frames += 1
+            else:
+                closed_frames = 0
+
+            # Trigger alert
+            if closed_frames >= CLOSED_FRAMES_THRESHOLD:
+                cv2.putText(
+                    frame,
+                    "DROWSINESS ALERT!",
+                    (50, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (0, 0, 255),
+                    3
+                )
 
     cv2.imshow("Drowsiness Detection", frame)
 
