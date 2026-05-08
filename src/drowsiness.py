@@ -2,6 +2,10 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
+from playsound import playsound
+import threading
+import os
+
 mp_face_mesh = mp.solutions.face_mesh
 
 face_mesh = mp_face_mesh.FaceMesh(
@@ -57,6 +61,15 @@ EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
 CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
 closed_frames = 0.  # Counter variable for consecutive closed eye frames
 
+alarm_on = False
+
+#def play_alarm():
+#    playsound("assets/alarm.wav")
+
+# Using native macOS sound player for better performance (no delay, no blocking)
+def play_alarm():
+    os.system("afplay assets/alarm.wav")
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -82,24 +95,24 @@ while True:
             # Display EAR
             cv2.putText(frame, f"EAR: {avg_ear:.2f}", (30, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            
+
             # Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame.
             if avg_ear < EAR_THRESHOLD:
                 closed_frames += 1
             else:
                 closed_frames = 0
 
-            # Trigger alert
+            # Trigger alert - Message on screen
             if closed_frames >= CLOSED_FRAMES_THRESHOLD:
-                cv2.putText(
-                    frame,
-                    "DROWSINESS ALERT!",
-                    (50, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1,
-                    (0, 0, 255),
-                    3
-                )
+                cv2.putText(frame, "DROWSINESS ALERT!", (50, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
+                if not alarm_on:
+                    alarm_on = True
+                    # Use threading to play sound without blocking the main thread (video processing + alarm simultaneously)
+                    threading.Thread(target=play_alarm).start()
+            else:
+                alarm_on = False
 
     cv2.imshow("Drowsiness Detection", frame)
 

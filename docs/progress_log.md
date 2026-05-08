@@ -123,3 +123,13 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calculation → Temporal Eye Closure Monitoring → Drowsiness Alert
 
 ---
+
+## Audio Alert
+
+### Completed:
+- Integrated audio alert system for drowsiness warning
+
+### Outcome:
+- Audio alert for drowsiness detection
+
+---
