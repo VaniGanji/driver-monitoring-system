@@ -1,10 +1,28 @@
+# Drowsiness Detection using Eye Aspect Ratio (EAR) with MediaPipe Face Mesh
+# Immediate alert when eyes are closed for a certain number of consecutive frames
+# Fatigue monitoring - Blink count per minute as secondary analytics for drowsiness
+
 import cv2
 import mediapipe as mp
 import numpy as np
-
 from playsound import playsound
 import threading
 import os
+import time
+
+# Eye landmark indices
+LEFT_EYE = [362, 385, 387, 263, 373, 380]
+RIGHT_EYE = [33, 160, 158, 133, 153, 144]
+
+EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
+CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
+
+closed_frames = 0   # Counter variable for consecutive closed eye frames
+alarm_on = False
+blink_detected = False
+blink_count = 0
+start_time = time.time()
+
 
 mp_face_mesh = mp.solutions.face_mesh
 
@@ -15,11 +33,6 @@ face_mesh = mp_face_mesh.FaceMesh(
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5
 )
-
-# Eye landmark indices
-LEFT_EYE = [362, 385, 387, 263, 373, 380]
-RIGHT_EYE = [33, 160, 158, 133, 153, 144]
-
 
 # EAR (Eye Aspect Ratio) = (vertical distances) / (horizontal distance)
 # Open eye:	High (~0.25–0.35)
@@ -54,21 +67,15 @@ def calculate_ear(landmarks, eye_indices, w, h):
     ear = (v1 + v2) / (2.0 * h_dist)   #average eye height / eye width
     return ear
 
-
-cap = cv2.VideoCapture(0)
-
-EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
-CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
-closed_frames = 0.  # Counter variable for consecutive closed eye frames
-
-alarm_on = False
-
 #def play_alarm():
 #    playsound("assets/alarm.wav")
 
 # Using native macOS sound player for better performance (no delay, no blocking)
 def play_alarm():
     os.system("afplay assets/alarm.wav")
+
+
+cap = cv2.VideoCapture(0)
 
 while True:
     ret, frame = cap.read()
@@ -99,10 +106,23 @@ while True:
             # Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame.
             if avg_ear < EAR_THRESHOLD:
                 closed_frames += 1
+                blink_detected = True
             else:
                 closed_frames = 0
+                if blink_detected:
+                    blink_count += 1
+                    blink_detected = False
 
-            # Trigger alert - Message on screen
+            # reset blink count every minute
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 60:
+                blink_count = 0
+                start_time = time.time()
+
+            cv2.putText(frame, f"Blinks: {blink_count}", (30, 90),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+
+            # Trigger alert - Message on screen and Audio alert
             if closed_frames >= CLOSED_FRAMES_THRESHOLD:
                 cv2.putText(frame, "DROWSINESS ALERT!", (50, 100),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)

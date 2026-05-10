@@ -133,3 +133,14 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 - Audio alert for drowsiness detection
 
 ---
+
+## Blinks count for Fatigue monitoring
+
+### Completed:
+- Implemented Blicks count per minute as secondary analytics for drowsiness
+- Displayed Blink count on video stream
+
+### Outcome:
+- Blink count and counter reset per minute
+
+---
