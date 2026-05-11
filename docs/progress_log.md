@@ -144,3 +144,21 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 - Blink count and counter reset per minute
 
 ---
+
+## Head Pose Estimation and Attention Monitoring
+
+### Completed:
+- Implemented basic head pose estimation using facial landmarks
+- Added driver attention monitoring functionality
+- Calculated head orientation using nose and eye alignment
+- Displayed real-time head direction status
+- Added distraction warning capability
+
+### Outcome:
+- Enhanced Driver Monitoring System with distraction detection capability
+- Added foundational attention-awareness monitoring
+
+### Current Pipeline:
+Camera Input → Face Mesh → Eye Landmark Extraction → EAR Calculation → Blink Detection → Drowsiness Detection → Head Direction Estimation → Attention Monitoring → Visual + Audio Alerts
+
+---

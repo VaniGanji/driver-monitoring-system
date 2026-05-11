@@ -17,6 +17,11 @@ RIGHT_EYE = [33, 160, 158, 133, 153, 144]
 EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
 CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
 
+# Head position estimation
+NOSE_TIP = 1
+LEFT_EYE_CORNER = 33
+RIGHT_EYE_CORNER = 263
+
 closed_frames = 0   # Counter variable for consecutive closed eye frames
 alarm_on = False
 blink_detected = False
@@ -79,6 +84,10 @@ cap = cv2.VideoCapture(0)
 
 while True:
     ret, frame = cap.read()
+     # flip horizontally for mirror view for webcam - more intuitive for user, 
+     # not required for real application with fixed camera
+    frame = cv2.flip(frame, 1)
+
     if not ret:
         break
 
@@ -120,12 +129,12 @@ while True:
                 start_time = time.time()
 
             cv2.putText(frame, f"Blinks: {blink_count}", (30, 90),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
             # Trigger alert - Message on screen and Audio alert
             if closed_frames >= CLOSED_FRAMES_THRESHOLD:
                 cv2.putText(frame, "DROWSINESS ALERT!", (50, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
                 if not alarm_on:
                     alarm_on = True
@@ -133,7 +142,42 @@ while True:
                     threading.Thread(target=play_alarm).start()
             else:
                 alarm_on = False
+            
+            # Head position estimation
+            nose_tip = face_landmarks.landmark[NOSE_TIP]
+            left_eye_corner = face_landmarks.landmark[LEFT_EYE_CORNER]
+            right_eye_corner = face_landmarks.landmark[RIGHT_EYE_CORNER]
 
+            nose_x = int(nose_tip.x * w)
+            nose_y = int(nose_tip.y * h)
+
+            left_x = int(left_eye_corner.x * w)
+            right_x = int(right_eye_corner.x * w)
+            
+ #           cv2.circle(frame, (nose_x, nose_y), 5, (0,255,0), -1)
+ #           cv2.circle(frame, (left_x, int(left_eye_corner.y * h)), 5, (255,0,0), -1)
+ #           cv2.circle(frame, (right_x, int(right_eye_corner.y * h)), 5, (255,0,0), -1)
+
+            eye_center_x = (left_x + right_x) // 2
+
+            head_offset = nose_x - eye_center_x
+
+            if head_offset > 20:
+                direction = "Looking Right"
+
+            elif head_offset < -20:
+                direction = "Looking Left"
+
+            else:
+                direction = "Forward"
+
+            cv2.putText(frame, f"Head: {direction}", (30, 140),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+            
+            if direction != "Forward":
+                cv2.putText(frame, "PAY ATTENTION!", (50, 180),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+            
     cv2.imshow("Drowsiness Detection", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
