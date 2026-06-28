@@ -162,3 +162,22 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 Camera Input → Face Mesh → Eye Landmark Extraction → EAR Calculation → Blink Detection → Drowsiness Detection → Head Direction Estimation → Attention Monitoring → Visual + Audio Alerts
 
 ---
+
+## Distraction Duration Monitoring and FPS Measurement
+
+### Completed:
+- Implemented distraction duration monitoring using consecutive frame counting
+- Added delayed distraction alerts to reduce false positives
+- Integrated FPS calculation to monitor real-time processing performance
+- Displayed live FPS and improved system robustness
+
+### Technical Learnings:
+- Learned temporal persistence for behavior analysis
+- Understood why production systems delay alerts for transient events
+- Explored FPS as a key performance metric in real-time computer vision
+
+### Outcome:
+- Improved Driver Monitoring System by distinguishing brief glances from sustained distraction
+- Added performance monitoring to evaluate real-time processing efficiency
+
+---

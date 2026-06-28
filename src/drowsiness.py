@@ -22,11 +22,15 @@ NOSE_TIP = 1
 LEFT_EYE_CORNER = 33
 RIGHT_EYE_CORNER = 263
 
+distracted_frames = 0
+DISTRACTION_THRESHOLD = 30
+
 closed_frames = 0   # Counter variable for consecutive closed eye frames
 alarm_on = False
 blink_detected = False
 blink_count = 0
-start_time = time.time()
+blink_count_reset_timer = time.time()
+fps_timer = time.time()   # frames per second
 
 
 mp_face_mesh = mp.solutions.face_mesh
@@ -109,7 +113,7 @@ while True:
             avg_ear = (left_ear + right_ear) / 2.0
 
             # Display EAR
-            cv2.putText(frame, f"EAR: {avg_ear:.2f}", (30, 50),
+            cv2.putText(frame, f"EAR: {avg_ear:.2f}", (30, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
             # Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame.
@@ -123,17 +127,17 @@ while True:
                     blink_detected = False
 
             # reset blink count every minute
-            elapsed_time = time.time() - start_time
+            elapsed_time = time.time() - blink_count_reset_timer
             if elapsed_time >= 60:
                 blink_count = 0
-                start_time = time.time()
+                blink_count_reset_timer = time.time()
 
             cv2.putText(frame, f"Blinks: {blink_count}", (30, 90),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
             # Trigger alert - Message on screen and Audio alert
             if closed_frames >= CLOSED_FRAMES_THRESHOLD:
-                cv2.putText(frame, "DROWSINESS ALERT!", (50, 100),
+                cv2.putText(frame, "DROWSINESS ALERT!", (30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
                 if not alarm_on:
@@ -171,12 +175,28 @@ while True:
             else:
                 direction = "Forward"
 
-            cv2.putText(frame, f"Head: {direction}", (30, 140),
+            cv2.putText(frame, f"Head: {direction}", (30, 120),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
-            
-            if direction != "Forward":
-                cv2.putText(frame, "PAY ATTENTION!", (50, 180),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
+            if direction == "Forward":
+                distracted_frames = 0
+            else:
+                distracted_frames += 1
+
+            if distracted_frames >= DISTRACTION_THRESHOLD:
+                cv2.putText(frame, "DRIVER DISTRACTED!", (40,220), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+
+            # Calculate and display Frames Per Second (FPS)
+            current_time = time.time()
+            time_diff = current_time - fps_timer
+            if time_diff > 0:
+                fps = 1 / time_diff
+            else:
+                fps = 0
+            fps_timer = current_time
+            cv2.putText(frame, f"FPS: {fps:.1f}", (30,30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
             
     cv2.imshow("Drowsiness Detection", frame)
 
