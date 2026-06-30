@@ -181,3 +181,26 @@ Camera Input → Face Mesh → Eye Landmark Extraction → EAR Calculation → B
 - Added performance monitoring to evaluate real-time processing efficiency
 
 ---
+
+## Basic Iris-Based Gaze Estimation
+
+### Completed:
+- Added MediaPipe iris landmark processing
+- Computed iris center using four iris landmarks
+- Calculated gaze ratio relative to eye corners
+- Implemented basic left/right/forward gaze estimation
+- Displayed real-time gaze direction
+
+### Findings:
+
+* Observed that the computed gaze ratio remained around **2.x**, whereas the expected range is approximately **0.0–1.0**.
+* Debugging revealed that the calculated iris center was outside the eye corner boundaries, indicating an incorrect landmark mapping rather than an issue with the mathematical formula.
+* Verified that the geometric approach for gaze estimation is valid, but accurate landmark selection and coordinate validation are critical for reliable results.
+
+### Outcome:
+
+* Established the foundation for iris-based gaze estimation.
+* Identified the need for a landmark visualization and verification step before finalizing the gaze estimation algorithm.
+* Improved understanding of the challenges involved in robust gaze tracking for Driver Monitoring Systems (DMS).
+
+---

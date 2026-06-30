@@ -13,14 +13,18 @@ import time
 # Eye landmark indices
 LEFT_EYE = [362, 385, 387, 263, 373, 380]
 RIGHT_EYE = [33, 160, 158, 133, 153, 144]
-
-EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
-CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
+LEFT_IRIS = [474, 475, 476, 477]
+RIGHT_IRIS = [469, 470, 471, 472]
+LEFT_EYE_LEFT = 33
+LEFT_EYE_RIGHT = 133
+RIGHT_EYE_LEFT = 362
+RIGHT_EYE_RIGHT = 263
 
 # Head position estimation
 NOSE_TIP = 1
-LEFT_EYE_CORNER = 33
-RIGHT_EYE_CORNER = 263
+
+EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
+CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
 
 distracted_frames = 0
 DISTRACTION_THRESHOLD = 30
@@ -146,24 +150,24 @@ while True:
                     threading.Thread(target=play_alarm).start()
             else:
                 alarm_on = False
+
+            # Eye corner landmarks for head position and Eye Gaze
+            left_eye_left_corner = face_landmarks.landmark[LEFT_EYE_LEFT]
+            left_eye_right_corner = face_landmarks.landmark[LEFT_EYE_RIGHT]
+            right_eye_left_corner = face_landmarks.landmark[RIGHT_EYE_LEFT]
+            right_eye_right_corner = face_landmarks.landmark[RIGHT_EYE_RIGHT]
+
+            left_eye_left_x = int(left_eye_left_corner.x * w)
+            left_eye_right_x = int(left_eye_right_corner.x * w)
+            right_eye_left_x = int(right_eye_left_corner.x * w)
+            right_eye_right_x = int(right_eye_right_corner.x * w)
             
             # Head position estimation
             nose_tip = face_landmarks.landmark[NOSE_TIP]
-            left_eye_corner = face_landmarks.landmark[LEFT_EYE_CORNER]
-            right_eye_corner = face_landmarks.landmark[RIGHT_EYE_CORNER]
-
             nose_x = int(nose_tip.x * w)
             nose_y = int(nose_tip.y * h)
-
-            left_x = int(left_eye_corner.x * w)
-            right_x = int(right_eye_corner.x * w)
             
- #           cv2.circle(frame, (nose_x, nose_y), 5, (0,255,0), -1)
- #           cv2.circle(frame, (left_x, int(left_eye_corner.y * h)), 5, (255,0,0), -1)
- #           cv2.circle(frame, (right_x, int(right_eye_corner.y * h)), 5, (255,0,0), -1)
-
-            eye_center_x = (left_x + right_x) // 2
-
+            eye_center_x = (left_eye_left_x + right_eye_right_x) // 2
             head_offset = nose_x - eye_center_x
 
             if head_offset > 20:
@@ -178,6 +182,7 @@ while True:
             cv2.putText(frame, f"Head: {direction}", (30, 120),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
+            # Distraction Duration Monitoring 
             if direction == "Forward":
                 distracted_frames = 0
             else:
@@ -198,6 +203,41 @@ while True:
             cv2.putText(frame, f"FPS: {fps:.1f}", (30,30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
             
+            #Eye Gaze Tracking with MediaPipe Iris
+            left_iris_points = []
+            for idx in LEFT_IRIS:
+                landmark = face_landmarks.landmark[idx]
+                left_iris_points.append(
+                    (
+                        int(landmark.x * w),
+                        int(landmark.y * h)
+                    )
+                )
+            # Calculate the center of the left iris: The average of four boundary points
+            left_iris_center_x = sum(p[0] for p in left_iris_points) / 4
+            left_iris_center_y = sum(p[1] for p in left_iris_points) / 4
+            cv2.circle(frame, (int(left_iris_center_x), int(left_iris_center_y)),
+                        3, (255,0,255), -1)
+            
+            # Calculate Gaze ratio: horizontal position of iris relative to eye corners
+            # Performed only for left eye initially
+            eye_width = left_eye_right_x - left_eye_left_x
+            iris_offset = left_iris_center_x - left_eye_left_x
+            gaze_ratio = iris_offset / eye_width
+            
+            # Gaze ratio < 0.35 → Eyes Left, Gaze ratio > 0.65 → Eyes Right, else Eyes Forward
+            if gaze_ratio < 0.35:
+                gaze = "Eyes Left"
+
+            elif gaze_ratio > 0.65:
+                gaze = "Eyes Right"
+
+            else:
+                gaze = "Eyes Forward"
+
+            cv2.putText(frame, f"Gaze: {gaze}", (30, 150),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+
     cv2.imshow("Drowsiness Detection", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
