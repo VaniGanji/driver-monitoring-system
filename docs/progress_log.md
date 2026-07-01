@@ -204,3 +204,22 @@ Camera Input → Face Mesh → Eye Landmark Extraction → EAR Calculation → B
 * Improved understanding of the challenges involved in robust gaze tracking for Driver Monitoring Systems (DMS).
 
 ---
+
+## MediaPipe Landmark Visualization & Gaze Estimation Investigation
+
+### Completed
+- Created a landmark visualization debug utility.
+- Verified that MediaPipe Face Mesh detects **478 landmarks** with `refine_landmarks=True`.
+- Highlighted and validated the following key landmarks:
+  - Nose tip (Landmark 1)
+  - Left eye corners (33, 133)
+  - Right eye corners (362, 263)
+  - Right iris (469–472)
+  - Left iris (474–477)
+- Confirmed that all expected landmarks are correctly detected and tracked in real time.
+
+### Findings
+- The initial gaze ratio implementation consistently produced values outside the expected range (approximately 2.x instead of 0–1).
+- Landmark visualization confirmed that the issue is **not** with MediaPipe landmark detection.
+
+---

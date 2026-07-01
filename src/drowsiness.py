@@ -10,6 +10,7 @@ import threading
 import os
 import time
 
+# Constants
 # Eye landmark indices
 LEFT_EYE = [362, 385, 387, 263, 373, 380]
 RIGHT_EYE = [33, 160, 158, 133, 153, 144]
@@ -19,20 +20,19 @@ LEFT_EYE_LEFT = 33
 LEFT_EYE_RIGHT = 133
 RIGHT_EYE_LEFT = 362
 RIGHT_EYE_RIGHT = 263
-
 # Head position estimation
 NOSE_TIP = 1
-
 EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
 CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
-
-distracted_frames = 0
 DISTRACTION_THRESHOLD = 30
+SHOW_LANDMARK_IDS = True   # debugging: show landmark IDs on the video feed for reference
 
+# Initialize variables
 closed_frames = 0   # Counter variable for consecutive closed eye frames
 alarm_on = False
 blink_detected = False
 blink_count = 0
+distracted_frames = 0
 blink_count_reset_timer = time.time()
 fps_timer = time.time()   # frames per second
 
@@ -110,17 +110,29 @@ while True:
     if results.multi_face_landmarks:
         for face_landmarks in results.multi_face_landmarks:
 
+            ### Landmark Visualization & Debugging ###
+            # print(len(face_landmarks.landmark)) : 478 - Face Mesh (468) with iris landmarks
+            if SHOW_LANDMARK_IDS:
+                for idx, landmark in enumerate(face_landmarks.landmark):
+                        x = int(landmark.x * w)
+                        y = int(landmark.y * h)
+                        #cv2.putText(frame, str(idx), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 255), 1)
+
+                        IMPORTANT_POINTS = [33, 133, 362, 263, 469, 470, 471, 472, 474, 475, 476, 477, 1]
+                        if idx in IMPORTANT_POINTS:
+                            cv2.putText(frame, str(idx), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 255), 1)
+                            cv2.circle(frame, (x, y), 4, (0,0,255), -1)
+
+            ### EAR (Eye Aspect Ratio) ###
             left_ear = calculate_ear(face_landmarks.landmark, LEFT_EYE, w, h)
             right_ear = calculate_ear(face_landmarks.landmark, RIGHT_EYE, w, h)
-
             # Average to get single stable eye state and avoid noisy left/right eye separately
             avg_ear = (left_ear + right_ear) / 2.0
-
             # Display EAR
             cv2.putText(frame, f"EAR: {avg_ear:.2f}", (30, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-            # Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame.
+            ### Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame ###
             if avg_ear < EAR_THRESHOLD:
                 closed_frames += 1
                 blink_detected = True
@@ -130,7 +142,7 @@ while True:
                     blink_count += 1
                     blink_detected = False
 
-            # reset blink count every minute
+            ### reset blink count every minute ###
             elapsed_time = time.time() - blink_count_reset_timer
             if elapsed_time >= 60:
                 blink_count = 0
@@ -139,7 +151,7 @@ while True:
             cv2.putText(frame, f"Blinks: {blink_count}", (30, 90),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
-            # Trigger alert - Message on screen and Audio alert
+            ### Trigger alert - Message on screen and Audio alert ###
             if closed_frames >= CLOSED_FRAMES_THRESHOLD:
                 cv2.putText(frame, "DROWSINESS ALERT!", (30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
@@ -151,7 +163,7 @@ while True:
             else:
                 alarm_on = False
 
-            # Eye corner landmarks for head position and Eye Gaze
+            ### Eye corner landmarks for head position and Eye Gaze ###
             left_eye_left_corner = face_landmarks.landmark[LEFT_EYE_LEFT]
             left_eye_right_corner = face_landmarks.landmark[LEFT_EYE_RIGHT]
             right_eye_left_corner = face_landmarks.landmark[RIGHT_EYE_LEFT]
@@ -162,7 +174,7 @@ while True:
             right_eye_left_x = int(right_eye_left_corner.x * w)
             right_eye_right_x = int(right_eye_right_corner.x * w)
             
-            # Head position estimation
+            ### Head position estimation ###
             nose_tip = face_landmarks.landmark[NOSE_TIP]
             nose_x = int(nose_tip.x * w)
             nose_y = int(nose_tip.y * h)
@@ -182,7 +194,7 @@ while True:
             cv2.putText(frame, f"Head: {direction}", (30, 120),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
-            # Distraction Duration Monitoring 
+            ### Distraction Duration Monitoring ###
             if direction == "Forward":
                 distracted_frames = 0
             else:
@@ -192,7 +204,7 @@ while True:
                 cv2.putText(frame, "DRIVER DISTRACTED!", (40,220), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
-            # Calculate and display Frames Per Second (FPS)
+            ### Calculate and display Frames Per Second (FPS) ###
             current_time = time.time()
             time_diff = current_time - fps_timer
             if time_diff > 0:
@@ -203,7 +215,7 @@ while True:
             cv2.putText(frame, f"FPS: {fps:.1f}", (30,30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
             
-            #Eye Gaze Tracking with MediaPipe Iris
+            ### Eye Gaze Tracking with MediaPipe Iris ###
             left_iris_points = []
             for idx in LEFT_IRIS:
                 landmark = face_landmarks.landmark[idx]
@@ -218,7 +230,7 @@ while True:
             left_iris_center_y = sum(p[1] for p in left_iris_points) / 4
             cv2.circle(frame, (int(left_iris_center_x), int(left_iris_center_y)),
                         3, (255,0,255), -1)
-            
+
             # Calculate Gaze ratio: horizontal position of iris relative to eye corners
             # Performed only for left eye initially
             eye_width = left_eye_right_x - left_eye_left_x
