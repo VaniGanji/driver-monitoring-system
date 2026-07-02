@@ -9,6 +9,7 @@ from playsound import playsound
 import threading
 import os
 import time
+from collections import deque
 
 # Constants
 # Eye landmark indices
@@ -25,7 +26,7 @@ NOSE_TIP = 1
 EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
 CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
 DISTRACTION_THRESHOLD = 30
-SHOW_LANDMARK_IDS = True   # debugging: show landmark IDs on the video feed for reference
+SHOW_LANDMARK_IDS = False   # debugging: show landmark IDs on the video feed for reference
 
 # Initialize variables
 closed_frames = 0   # Counter variable for consecutive closed eye frames
@@ -35,6 +36,9 @@ blink_count = 0
 distracted_frames = 0
 blink_count_reset_timer = time.time()
 fps_timer = time.time()   # frames per second
+# deque to persist across frames
+# at FPS of 30, 5 frames = 0.16 seconds, enough to smooth out rapid eye movements/noise and system still feels responsive
+gaze_history = deque(maxlen=5)
 
 
 mp_face_mesh = mp.solutions.face_mesh
@@ -87,6 +91,31 @@ def calculate_ear(landmarks, eye_indices, w, h):
 def play_alarm():
     os.system("afplay assets/alarm.wav")
 
+def iris_center(landmarks, iris_indices, w, h):
+    points = []
+
+    for idx in iris_indices:
+        lm = landmarks[idx]
+        points.append((lm.x * w, lm.y * h))
+
+    center = np.mean(points, axis=0)
+
+    return center
+
+
+def gaze_ratio(iris_center_x, outer_x, inner_x):
+
+    left = min(outer_x, inner_x)
+    right = max(outer_x, inner_x)
+
+    eye_width = right - left
+
+    if eye_width == 0:
+        return 0.5
+
+    ratio = (iris_center_x - left) / eye_width
+
+    return ratio
 
 cap = cv2.VideoCapture(0)
 
@@ -215,40 +244,29 @@ while True:
             cv2.putText(frame, f"FPS: {fps:.1f}", (30,30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
             
-            ### Eye Gaze Tracking with MediaPipe Iris ###
-            left_iris_points = []
-            for idx in LEFT_IRIS:
-                landmark = face_landmarks.landmark[idx]
-                left_iris_points.append(
-                    (
-                        int(landmark.x * w),
-                        int(landmark.y * h)
-                    )
-                )
-            # Calculate the center of the left iris: The average of four boundary points
-            left_iris_center_x = sum(p[0] for p in left_iris_points) / 4
-            left_iris_center_y = sum(p[1] for p in left_iris_points) / 4
-            cv2.circle(frame, (int(left_iris_center_x), int(left_iris_center_y)),
-                        3, (255,0,255), -1)
+            ### Eye Gaze Estimation ###
+            left_center = iris_center(face_landmarks.landmark, LEFT_IRIS, w, h)
+            right_center = iris_center(face_landmarks.landmark, RIGHT_IRIS, w, h)
 
-            # Calculate Gaze ratio: horizontal position of iris relative to eye corners
-            # Performed only for left eye initially
-            eye_width = left_eye_right_x - left_eye_left_x
-            iris_offset = left_iris_center_x - left_eye_left_x
-            gaze_ratio = iris_offset / eye_width
+            left_gaze_ratio = gaze_ratio(left_center[0], left_eye_left_x, left_eye_right_x)
+            right_gaze_ratio = gaze_ratio(right_center[0], right_eye_left_x, right_eye_right_x)
+
+            avg_ratio = (left_gaze_ratio + right_gaze_ratio) / 2
+            # store last 5 gaze ratios for smoothing and stability, to avoid sudden jumps in gaze direction due to noise or rapid eye movement
+            gaze_history.append(avg_ratio)
+            stable_ratio = sum(gaze_history) / len(gaze_history)
             
-            # Gaze ratio < 0.35 → Eyes Left, Gaze ratio > 0.65 → Eyes Right, else Eyes Forward
-            if gaze_ratio < 0.35:
+            if stable_ratio < 0.30:
                 gaze = "Eyes Left"
 
-            elif gaze_ratio > 0.65:
+            elif stable_ratio > 0.70:
                 gaze = "Eyes Right"
 
             else:
                 gaze = "Eyes Forward"
-
-            cv2.putText(frame, f"Gaze: {gaze}", (30, 150),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            
+            cv2.putText(frame, f"Gaze Ratio: {gaze}", (20,180),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
 
     cv2.imshow("Drowsiness Detection", frame)
 

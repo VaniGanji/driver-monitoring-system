@@ -223,3 +223,33 @@ Camera Input → Face Mesh → Eye Landmark Extraction → EAR Calculation → B
 - Landmark visualization confirmed that the issue is **not** with MediaPipe landmark detection.
 
 ---
+
+## Robust Eye Gaze Estimation
+
+### Completed
+- Calculated iris centers using MediaPipe iris landmarks for both eyes.
+- Computed normalized gaze ratios independently for the left and right eyes.
+- Combined both eye measurements by averaging their gaze ratios.
+- Added real-time visualization of gaze ratio.
+- Implemented a moving average filter (`deque`) to reduce frame-to-frame jitter in gaze estimation.
+
+### Validation Results
+Collected gaze ratio measurements under different eye movements:
+
+| Eye Direction | Observed Range |
+|---------------|----------------|
+| Left | -0.01 to 0.18 |
+| Forward | 0.49 to 0.54 |
+| Right | 0.57 to 1.08 |
+
+### Outcome
+- Successfully implemented a robust iris-based gaze estimation module.
+- Driver Monitoring System can now estimate:
+  - Eye Aspect Ratio (EAR)
+  - Blink detection
+  - Drowsiness detection
+  - Head pose estimation
+  - Eye gaze estimation
+  - Driver distraction
+
+---
