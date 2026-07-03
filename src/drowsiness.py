@@ -10,6 +10,7 @@ import threading
 import os
 import time
 from collections import deque
+from enum import Enum
 
 # Constants
 # Eye landmark indices
@@ -25,8 +26,15 @@ RIGHT_EYE_RIGHT = 263
 NOSE_TIP = 1
 EAR_THRESHOLD = 0.22   # Below this value, consider the eye to be closed
 CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to trigger alert
-DISTRACTION_THRESHOLD = 30
+DISTRACTION_THRESHOLD = 60   # at FPS of 30, 60 frames ~ 2 seconds,
 SHOW_LANDMARK_IDS = False   # debugging: show landmark IDs on the video feed for reference
+
+class AttentionState(Enum):
+    ATTENTIVE = "ATTENTIVE"
+    LOOKING_LEFT = "LOOKING LEFT"
+    LOOKING_RIGHT = "LOOKING RIGHT"
+    HEAD_TURNED = "HEAD TURNED"
+    DISTRACTED = "DISTRACTED"
 
 # Initialize variables
 closed_frames = 0   # Counter variable for consecutive closed eye frames
@@ -37,7 +45,7 @@ distracted_frames = 0
 blink_count_reset_timer = time.time()
 fps_timer = time.time()   # frames per second
 # deque to persist across frames
-# at FPS of 30, 5 frames = 0.16 seconds, enough to smooth out rapid eye movements/noise and system still feels responsive
+# at FPS of 30, 5 frames ~ 0.16 seconds, enough to smooth out rapid eye movements/noise and system still feels responsive
 gaze_history = deque(maxlen=5)
 
 
@@ -117,6 +125,21 @@ def gaze_ratio(iris_center_x, outer_x, inner_x):
 
     return ratio
 
+def get_attention_state(head_direction, gaze):
+
+    if head_direction == "Head Forward":
+
+        if gaze == "Eyes Forward":
+            return AttentionState.ATTENTIVE
+
+        elif gaze == "Eyes Left":
+            return AttentionState.LOOKING_LEFT
+
+        elif gaze == "Eyes Right":
+            return AttentionState.LOOKING_RIGHT
+
+    return AttentionState.HEAD_TURNED
+
 cap = cv2.VideoCapture(0)
 
 while True:
@@ -151,6 +174,17 @@ while True:
                         if idx in IMPORTANT_POINTS:
                             cv2.putText(frame, str(idx), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 255), 1)
                             cv2.circle(frame, (x, y), 4, (0,0,255), -1)
+            
+            ### Calculate and display Frames Per Second (FPS) ###
+            current_time = time.time()
+            time_diff = current_time - fps_timer
+            if time_diff > 0:
+                fps = 1 / time_diff
+            else:
+                fps = 0
+            fps_timer = current_time
+            cv2.putText(frame, f"FPS: {fps:.1f}", (30,30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
 
             ### EAR (Eye Aspect Ratio) ###
             left_ear = calculate_ear(face_landmarks.landmark, LEFT_EYE, w, h)
@@ -182,7 +216,7 @@ while True:
 
             ### Trigger alert - Message on screen and Audio alert ###
             if closed_frames >= CLOSED_FRAMES_THRESHOLD:
-                cv2.putText(frame, "DROWSINESS ALERT!", (30, 150),
+                cv2.putText(frame, "DROWSINESS ALERT!", (30, 120),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
                 if not alarm_on:
@@ -211,38 +245,17 @@ while True:
             eye_center_x = (left_eye_left_x + right_eye_right_x) // 2
             head_offset = nose_x - eye_center_x
 
-            if head_offset > 20:
-                direction = "Looking Right"
+            if head_offset > 30:
+                head_direction = "Head Right"
 
-            elif head_offset < -20:
-                direction = "Looking Left"
+            elif head_offset < -30:
+                head_direction = "Head Left"
 
             else:
-                direction = "Forward"
+                head_direction = "Head Forward"
 
-            cv2.putText(frame, f"Head: {direction}", (30, 120),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
-
-            ### Distraction Duration Monitoring ###
-            if direction == "Forward":
-                distracted_frames = 0
-            else:
-                distracted_frames += 1
-
-            if distracted_frames >= DISTRACTION_THRESHOLD:
-                cv2.putText(frame, "DRIVER DISTRACTED!", (40,220), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
-
-            ### Calculate and display Frames Per Second (FPS) ###
-            current_time = time.time()
-            time_diff = current_time - fps_timer
-            if time_diff > 0:
-                fps = 1 / time_diff
-            else:
-                fps = 0
-            fps_timer = current_time
-            cv2.putText(frame, f"FPS: {fps:.1f}", (30,30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
+            # cv2.putText(frame, f"Head: {head_direction}", (30, 120),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
             
             ### Eye Gaze Estimation ###
             left_center = iris_center(face_landmarks.landmark, LEFT_IRIS, w, h)
@@ -265,8 +278,24 @@ while True:
             else:
                 gaze = "Eyes Forward"
             
-            cv2.putText(frame, f"Gaze Ratio: {gaze}", (20,180),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
+            # cv2.putText(frame, f"Gaze : {gaze}", (30,180),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
+            
+            ### Driver Attention State Fusion : Head Position + Eye Gaze ###
+            attention = get_attention_state(head_direction, gaze)
+            
+            cv2.putText(frame, f"Attention: {attention.value}", (30, 150),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255), 2)
+            
+            ### Distraction Duration Monitoring ###
+            if attention != AttentionState.ATTENTIVE:
+                distracted_frames += 1
+            else:
+                distracted_frames = 0
+
+            if distracted_frames > DISTRACTION_THRESHOLD:
+                cv2.putText(frame, "DISTRACTION ALERT!", (30,180),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
     cv2.imshow("Drowsiness Detection", frame)
 

@@ -253,3 +253,30 @@ Collected gaze ratio measurements under different eye movements:
   - Driver distraction
 
 ---
+
+## Driver Attention State Fusion
+
+### Completed
+- Implemented driver attention state fusion by combining:
+  - Head pose estimation
+  - Eye gaze estimation
+- Developed rule-based decision logic to classify the driver's attention state based on head orientation and eye gaze.
+- Implemented a distraction frame counter to track sustained inattentive behavior.
+- Triggered a visual distraction alert after the configured threshold was exceeded.
+- Tuned the head pose threshold by increasing the head offset from the initial value to **30 pixels**, significantly reducing false left/right detections caused by minor natural head movements.
+
+### Outcome
+- Successfully transformed independent perception modules into a unified Driver Attention Monitoring pipeline.
+- The Driver Monitoring System now evaluates:
+  - Face detection
+  - Facial landmarks
+  - Eye Aspect Ratio (EAR)
+  - Blink detection
+  - Drowsiness detection
+  - Head pose estimation
+  - Eye gaze estimation
+  - Driver attention state
+  - Driver distraction detection
+
+  ---
+
