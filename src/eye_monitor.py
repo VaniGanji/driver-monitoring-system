@@ -75,3 +75,14 @@ def process_eye_state(avg_ear):
         
     is_drowsy = state["closed_frames"] >= CLOSED_FRAMES_THRESHOLD
     return state["blink_count"], is_drowsy
+
+
+def reset_eye_state():
+    """
+    Reset the eye state to initial values.
+
+    """
+    state["closed_frames"] = 0
+    state["blink_detected"] = False
+    state["blink_count"] = 0
+    state["blink_count_reset_timer"] = time.time()

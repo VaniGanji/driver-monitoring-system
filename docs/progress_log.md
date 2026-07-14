@@ -280,3 +280,11 @@ Collected gaze ratio measurements under different eye movements:
 
   ---
 
+##  Robust Face Tracking & Failure Handling
+
+## Completed 
+- Added handling for the **No Face Detected** scenario.
+- Prevented stale head pose, eye gaze, and attention information from being displayed.
+- Eye Monitor Reset
+- Intentionally kept a short alarm clip instead of implementing alarm interruption logic to keep the project simple and focused on computer vision.
+

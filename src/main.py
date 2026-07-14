@@ -116,6 +116,14 @@ while True:
                 cv2.putText(frame, "DISTRACTION ALERT!", TEXT_DISTRACTION_ALERT_POS,
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
+    else:
+        head_direction = "Unknown"
+        gaze = "Unknown"
+        attention_state = AttentionState.UNKNOWN
+        eye_monitor.reset_eye_state()
+        cv2.putText(frame, "NO FACE DETECTED", TEXT_FACE_STATUS_POS,
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+
     cv2.imshow("Drowsiness Detection", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
