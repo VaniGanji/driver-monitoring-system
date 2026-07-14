@@ -52,6 +52,8 @@ while True:
     results = face_mesh.process(rgb)
 
     if results.multi_face_landmarks:
+        cv2.putText(frame, "FACE DETECTED", TEXT_FACE_STATUS_POS,
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
         for face_landmarks in results.multi_face_landmarks:
 
             ### Landmark Visualization & Debugging ###
