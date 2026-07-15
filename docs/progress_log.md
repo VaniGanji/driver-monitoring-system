@@ -278,7 +278,7 @@ Collected gaze ratio measurements under different eye movements:
   - Driver attention state
   - Driver distraction detection
 
-  ---
+---
 
 ##  Robust Face Tracking & Failure Handling
 
@@ -287,4 +287,34 @@ Collected gaze ratio measurements under different eye movements:
 - Prevented stale head pose, eye gaze, and attention information from being displayed.
 - Eye Monitor Reset
 - Intentionally kept a short alarm clip instead of implementing alarm interruption logic to keep the project simple and focused on computer vision.
+
+---
+
+# Driver Event Logging
+
+## Objective
+Implemented an event-driven logging system to record significant Driver Monitoring System events with timestamps. The logging mechanism captures only meaningful state transitions, avoiding duplicate entries for every video frame.
+
+## Completed Tasks
+- Created a dedicated `event_logger.py` module.
+- Separated logging functionality from perception and decision-making modules.
+- Logged events in CSV format for easy analysis using Excel or Python.
+- Implemented logging only when system states changed, preventing duplicate log entries during continuous video processing.
+
+## Sample Output
+## csv
+Timestamp,Event
+2026-07-15 21:54:20,Face Detected
+2026-07-15 21:54:20,AttentionState.ATTENTIVE
+2026-07-15 21:54:34,Drowsiness Alert
+2026-07-15 21:54:38,Drowsiness Cleared
+2026-07-15 21:54:49,AttentionState.HEAD_TURNED
+2026-07-15 21:54:49,Face Lost
+2026-07-15 21:54:53,Face Detected
+2026-07-15 21:54:53,AttentionState.ATTENTIVE
+2026-07-15 21:55:00,AttentionState.HEAD_TURNED
+2026-07-15 21:55:06,AttentionState.LOOKING_RIGHT
+2026-07-15 21:55:06,AttentionState.ATTENTIVE
+
+---
 

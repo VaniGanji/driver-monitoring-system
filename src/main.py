@@ -9,6 +9,7 @@ import time
 from collections import deque
 
 from config import *
+import event_logger
 import eye_monitor
 import attention_monitor
 import utils
@@ -21,6 +22,11 @@ fps_timer = time.time()   # frames per second
 # at FPS of 30, 5 frames ~ 0.16 seconds, enough to smooth out rapid eye movements/noise and system still feels responsive
 gaze_history = deque(maxlen=5)
 
+# variables to log events
+last_attention_state = AttentionState.UNKNOWN
+face_detected = False
+last_drowsy = False
+
 
 mp_face_mesh = mp.solutions.face_mesh
 
@@ -31,6 +37,8 @@ face_mesh = mp_face_mesh.FaceMesh(
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5
 )
+
+event_logger.initialize_logger()
 
 cap = cv2.VideoCapture(0)
 
@@ -52,8 +60,14 @@ while True:
     results = face_mesh.process(rgb)
 
     if results.multi_face_landmarks:
+
         cv2.putText(frame, "FACE DETECTED", TEXT_FACE_STATUS_POS,
             cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+        # logging to file
+        if not face_detected:
+            event_logger.log_event("Face Detected")
+            face_detected = True
+
         for face_landmarks in results.multi_face_landmarks:
 
             ### Landmark Visualization & Debugging ###
@@ -92,6 +106,14 @@ while True:
             else:
                 alarm_on = False
 
+            # logging to file
+            if is_drowsy != last_drowsy:
+                if is_drowsy:
+                    event_logger.log_event("Drowsiness Alert")
+                else:
+                    event_logger.log_event("Drowsiness Cleared")
+                last_drowsy = is_drowsy
+
             ### Head Position Estimation ###
             head_direction = attention_monitor.estimate_head_direction(face_landmarks, w, HEAD_OFFSET_THRESHOLD)
             # cv2.putText(frame, f"Head: {head_direction}", (30, 120),
@@ -103,13 +125,18 @@ while True:
             #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
             
             ### Driver Attention State Fusion : Head Position + Eye Gaze ###
-            attention = attention_monitor.get_attention_state(head_direction, gaze)
+            attention_state = attention_monitor.get_attention_state(head_direction, gaze)
             
-            cv2.putText(frame, f"Attention: {attention.value}", TEXT_ATTENTION_POS,
+            cv2.putText(frame, f"Attention: {attention_state.value}", TEXT_ATTENTION_POS,
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255), 2)
             
+            # logging to file
+            if attention_state != last_attention_state:
+                event_logger.log_event(attention_state)
+                last_attention_state = attention_state
+            
             ### Distraction Duration Monitoring ###
-            if attention != AttentionState.ATTENTIVE:
+            if attention_state != AttentionState.ATTENTIVE:
                 distracted_frames += 1
             else:
                 distracted_frames = 0
@@ -125,6 +152,10 @@ while True:
         eye_monitor.reset_eye_state()
         cv2.putText(frame, "NO FACE DETECTED", TEXT_FACE_STATUS_POS,
             cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+        # logging to file
+        if face_detected:
+            event_logger.log_event("Face Lost")
+            face_detected = False
 
     cv2.imshow("Drowsiness Detection", frame)
 
