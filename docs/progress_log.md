@@ -318,3 +318,56 @@ Timestamp,Event
 
 ---
 
+# Performance Profiling & Pipeline Benchmarking
+
+## Objective
+Profiled the Driver Monitoring System pipeline to measure execution time of each processing stage, identify performance bottlenecks, and understand real-time system characteristics. The focus was on measuring system behavior rather than optimizing algorithms.
+
+## Completed Tasks
+- Measured execution time for the following stages:
+  - Frame Capture
+  - MediaPipe Face Mesh Inference
+  - Eye Monitoring
+  - Attention Monitoring
+- Displayed execution statistics once every second to avoid excessive console output.
+- Reported execution time of each pipeline stage along with total pipeline latency.
+
+Example output:
+--------------------------------
+Capture          : 32.66 ms
+FaceMesh         : 6.93 ms
+EyeMonitor       : 0.06 ms
+AttentionMonitor : 0.07 ms
+Total            : 39.72 ms
+--------------------------------
+
+## Performance Observations
+- Frame Capture - Average execution time: **20–40 ms**
+- MediaPipe Face Mesh - Typical inference time: **6–7 ms**
+- Eye Monitoring - Average processing time: **0.05–0.25 ms**
+- Attention Monitoring - Average processing time: **0.05–0.25 ms**
+
+### Total Pipeline Latency 
+- Typical latency: **35–45 ms per frame**
+### Throughput
+- Typical pipeline latency corresponds to approximately: (1000/~40ms latency)  **22–30 FPS**
+### Bottleneck Analysis
+- Identified camera frame acquisition (`cv2.VideoCapture.read()`) as the primary contributor to overall pipeline latency.
+- Observed that perception algorithms (EAR, gaze estimation, attention classification) require only a fraction of the total processing time.
+
+## Project Status
+The Driver Monitoring System now includes:
+- ✅ Face Detection & Face Mesh
+- ✅ Eye Aspect Ratio (EAR)
+- ✅ Blink Detection
+- ✅ Drowsiness Detection
+- ✅ Head Direction Estimation
+- ✅ Eye Gaze Estimation
+- ✅ Attention State Classification
+- ✅ Distraction Duration Monitoring
+- ✅ Audio Alert
+- ✅ Robust Face Tracking & Recovery
+- ✅ Event Logging
+- ✅ Performance Profiling & Pipeline Benchmarking
+
+---

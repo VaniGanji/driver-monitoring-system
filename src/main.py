@@ -12,7 +12,9 @@ from config import *
 import event_logger
 import eye_monitor
 import attention_monitor
+import performance_monitor
 import utils
+
 
 # Initialize variables
 alarm_on = False
@@ -39,11 +41,14 @@ face_mesh = mp_face_mesh.FaceMesh(
 )
 
 event_logger.initialize_logger()
+perf = performance_monitor.PerformanceMonitor()
 
 cap = cv2.VideoCapture(0)
 
 while True:
+    perf.start("capture")
     ret, frame = cap.read()
+    perf.stop("capture")
      # flip horizontally for mirror view for webcam - more intuitive for user, 
      # not required for real application with fixed camera
     frame = cv2.flip(frame, 1)
@@ -57,7 +62,9 @@ while True:
     h, w, _ = frame.shape
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+    perf.start("face_mesh")
     results = face_mesh.process(rgb)
+    perf.stop("face_mesh")
 
     if results.multi_face_landmarks:
 
@@ -79,17 +86,20 @@ while True:
             cv2.putText(frame, f"FPS: {fps:.1f}", TEXT_FPS_POS,
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
 
+            perf.start("eye_monitor")
             ### EAR (Eye Aspect Ratio) ###
             left_ear = eye_monitor.calculate_ear(face_landmarks.landmark, LEFT_EYE, w, h)
             right_ear = eye_monitor.calculate_ear(face_landmarks.landmark, RIGHT_EYE, w, h)
             # Average to get single stable eye state and avoid noisy left/right eye separately
             avg_ear = (left_ear + right_ear) / 2.0
-            # Display EAR
-            cv2.putText(frame, f"EAR: {avg_ear:.2f}", TEXT_EAR_POS,
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
             ### Drowsiness detection : temporal behavior analysis - decision depends on time sequence, not one frame ###
             blink_count, is_drowsy = eye_monitor.process_eye_state(avg_ear)
+            perf.stop("eye_monitor")
+
+            # Display EAR
+            cv2.putText(frame, f"EAR: {avg_ear:.2f}", TEXT_EAR_POS,
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
             cv2.putText(frame, f"Blinks: {blink_count}", TEXT_BLINK_POS,
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
@@ -114,6 +124,7 @@ while True:
                     event_logger.log_event("Drowsiness Cleared")
                 last_drowsy = is_drowsy
 
+            perf.start("attention_monitor")
             ### Head Position Estimation ###
             head_direction = attention_monitor.estimate_head_direction(face_landmarks, w, HEAD_OFFSET_THRESHOLD)
             # cv2.putText(frame, f"Head: {head_direction}", (30, 120),
@@ -126,6 +137,7 @@ while True:
             
             ### Driver Attention State Fusion : Head Position + Eye Gaze ###
             attention_state = attention_monitor.get_attention_state(head_direction, gaze)
+            perf.stop("attention_monitor")
             
             cv2.putText(frame, f"Attention: {attention_state.value}", TEXT_ATTENTION_POS,
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255), 2)
@@ -156,6 +168,8 @@ while True:
         if face_detected:
             event_logger.log_event("Face Lost")
             face_detected = False
+
+    performance_monitor.display_performance(perf)
 
     cv2.imshow("Drowsiness Detection", frame)
 
