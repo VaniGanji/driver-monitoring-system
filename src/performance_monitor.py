@@ -1,5 +1,6 @@
-import time
+# Performance Monitor
 
+import time
 
 class PerformanceMonitor:
 

@@ -26,7 +26,7 @@ def draw_landmark_debug(frame,
     Draw selected MediaPipe Face Mesh landmarks for debugging
 
     """
-    
+
     # print(len(face_landmarks.landmark)) : 478 - Face Mesh (468) with iris landmarks
 
     for idx in points:

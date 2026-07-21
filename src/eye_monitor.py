@@ -20,7 +20,7 @@ def calculate_ear(landmarks, eye_indices, w, h):
     EAR (Eye Aspect Ratio) = (vertical distances) / (horizontal distance)
     Open eye:	High (~0.25–0.35)
     Closed eye:	Low (~0.1–0.2)
-    
+
     """
     points = []
 
@@ -72,7 +72,7 @@ def process_eye_state(avg_ear):
     if elapsed_time >= 60:
         state["blink_count"] = 0
         state["blink_count_reset_timer"] = time.time()
-        
+
     is_drowsy = state["closed_frames"] >= CLOSED_FRAMES_THRESHOLD
     return state["blink_count"], is_drowsy
 

@@ -19,6 +19,7 @@ CLOSED_FRAMES_THRESHOLD = 30   # no. of consecutive frames with closed eyes to t
 HEAD_OFFSET_THRESHOLD = 30   # pixels, threshold for head position estimation
 DISTRACTION_THRESHOLD = 60   # at FPS of 30, 60 frames ~ 2 seconds,
 SHOW_LANDMARK_IDS = False   # debugging: show landmark IDs on the video feed for reference
+SHOW_PERFORMANCE = True
 
 GAZE_LEFT_THRESHOLD = 0.30
 GAZE_RIGHT_THRESHOLD = 0.70

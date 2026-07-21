@@ -2,72 +2,17 @@
 
 ---
 
-## Project Setup
+## Project Initialization
 
 ### Completed:
-- Created GitHub repository
-- Cloned repository to local system
-- Defined project folder structure (src, models, dataset, docs, results, scripts)
-- Added README with project overview and goals
-- Configured .gitignore for clean repository management
-
-### Outcome:
-- Clean and organized project structure ready for development
-
----
-
-## Environment Setup
-
-### Completed:
-- Created Python virtual environment
-- Installed required libraries (OpenCV, NumPy, Matplotlib, TensorFlow)
-- Implemented initial test script to verify setup
-
-### Outcome:
-- Development environment successfully configured and verified
-
----
-
-## Camera Stream
-
-### Completed:
-- Implemented real-time webcam video capture using OpenCV
-- Displayed live video feed using cv2.imshow()
-- Handled user input and exit control using cv2.waitKey()
-
-### Outcome:
-- Functional real-time video pipeline established
-
----
-
-## Face Detection
-
-### Completed:
-- Implemented face detection using Haar Cascade classifier
-- Integrated detection into live camera stream
-- Tuned parameters (scaleFactor, minNeighbors) for better accuracy
-- Displayed bounding boxes around detected faces
-
-- Generated requirements.txt for reproducibility (missed while Environment setup)
-
-### Outcome:
-- Real-time face detection successfully working
-- Foundation established for further driver monitoring features
-
----
-
-## Eye Detection + Detection Stability Improvements
-
-### Completed:
-- Implemented eye detection using Haar Cascade within detected face region
-- Optimized detection by restricting eye search to upper face ROI
-- Tuned parameters (`scaleFactor`, `minNeighbors`) to reduce false positives
-- Applied filtering to keep only the most relevant eye detections
-- Improved system stability by reducing multiple/duplicate detections
+- Repository setup
+- Development environment
+- OpenCV camera pipeline
+- Initial Haar Cascade prototype: Face detection and Eye detection
 
 ### Observations:
 - Haar Cascade-based detection works but shows limitations in real-world scenarios:
-  - False positives under head movement and pose variation
+  - False positives under head movement and direction variation
   - Reduced stability during face tilt
   - Multiple overlapping detections in some frames
 
@@ -82,7 +27,7 @@
 ### Completed:
 - Integrated MediaPipe face detection for improved robustness
 - Replaced Haar Cascade for face detection
-- Achieved stable detection under head tilt and pose variation
+- Achieved stable detection under head tilt and direction variation
 
 ### Outcome:
 - Reliable real-time face detection suitable for DMS applications
@@ -103,9 +48,6 @@
 - Successfully built foundational eye-state monitoring logic for Driver Monitoring System (DMS)
 - Established core pipeline for blink and drowsiness detection
 
-### Current Pipeline:
-Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calculation → Real-time Eye State Monitoring
-
 ---
 
 ## Drowsiness Detection Logic
@@ -119,9 +61,6 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 ### Outcome:
 - Successfully implemented core drowsiness detection functionality for DMS
 
-### Current Pipeline:
-Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calculation → Temporal Eye Closure Monitoring → Drowsiness Alert
-
 ---
 
 ## Audio Alert
@@ -129,26 +68,20 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 ### Completed:
 - Integrated audio alert system for drowsiness warning
 
-### Outcome:
-- Audio alert for drowsiness detection
-
 ---
 
 ## Blinks count for Fatigue monitoring
 
 ### Completed:
-- Implemented Blicks count per minute as secondary analytics for drowsiness
+- Implemented Blinks count per minute as secondary analytics for drowsiness
 - Displayed Blink count on video stream
-
-### Outcome:
-- Blink count and counter reset per minute
 
 ---
 
-## Head Pose Estimation and Attention Monitoring
+## Head direction Estimation and Attention Monitoring
 
 ### Completed:
-- Implemented basic head pose estimation using facial landmarks
+- Implemented basic head direction estimation using facial landmarks
 - Added driver attention monitoring functionality
 - Calculated head orientation using nose and eye alignment
 - Displayed real-time head direction status
@@ -157,9 +90,6 @@ Camera Input → MediaPipe Face Mesh → Eye Landmark Extraction → EAR Calcula
 ### Outcome:
 - Enhanced Driver Monitoring System with distraction detection capability
 - Added foundational attention-awareness monitoring
-
-### Current Pipeline:
-Camera Input → Face Mesh → Eye Landmark Extraction → EAR Calculation → Blink Detection → Drowsiness Detection → Head Direction Estimation → Attention Monitoring → Visual + Audio Alerts
 
 ---
 
@@ -244,13 +174,6 @@ Collected gaze ratio measurements under different eye movements:
 
 ### Outcome
 - Successfully implemented a robust iris-based gaze estimation module.
-- Driver Monitoring System can now estimate:
-  - Eye Aspect Ratio (EAR)
-  - Blink detection
-  - Drowsiness detection
-  - Head pose estimation
-  - Eye gaze estimation
-  - Driver distraction
 
 ---
 
@@ -258,25 +181,15 @@ Collected gaze ratio measurements under different eye movements:
 
 ### Completed
 - Implemented driver attention state fusion by combining:
-  - Head pose estimation
+  - Head direction estimation
   - Eye gaze estimation
 - Developed rule-based decision logic to classify the driver's attention state based on head orientation and eye gaze.
 - Implemented a distraction frame counter to track sustained inattentive behavior.
 - Triggered a visual distraction alert after the configured threshold was exceeded.
-- Tuned the head pose threshold by increasing the head offset from the initial value to **30 pixels**, significantly reducing false left/right detections caused by minor natural head movements.
+- Tuned the head direction threshold by increasing the head offset from the initial value to **30 pixels**, significantly reducing false left/right detections caused by minor natural head movements.
 
 ### Outcome
 - Successfully transformed independent perception modules into a unified Driver Attention Monitoring pipeline.
-- The Driver Monitoring System now evaluates:
-  - Face detection
-  - Facial landmarks
-  - Eye Aspect Ratio (EAR)
-  - Blink detection
-  - Drowsiness detection
-  - Head pose estimation
-  - Eye gaze estimation
-  - Driver attention state
-  - Driver distraction detection
 
 ---
 
@@ -284,7 +197,7 @@ Collected gaze ratio measurements under different eye movements:
 
 ## Completed 
 - Added handling for the **No Face Detected** scenario.
-- Prevented stale head pose, eye gaze, and attention information from being displayed.
+- Prevented stale head direction, eye gaze, and attention information from being displayed.
 - Eye Monitor Reset
 - Intentionally kept a short alarm clip instead of implementing alarm interruption logic to keep the project simple and focused on computer vision.
 
@@ -371,3 +284,76 @@ The Driver Monitoring System now includes:
 - ✅ Performance Profiling & Pipeline Benchmarking
 
 ---
+
+# 🚀 Python v1.0 Release Summary
+
+## Project Overview
+
+A real-time Driver Monitoring System (DMS) prototype developed in Python using OpenCV and MediaPipe Face Mesh. The system monitors driver drowsiness and distraction by analyzing facial landmarks, eye movements, head direction, and blink behavior. The project follows a modular architecture and serves as the reference implementation for future migration to C++ and embedded AI deployment.
+
+## Implemented Features
+
+✓ Real-time camera capture
+✓ Face detection using MediaPipe Face Mesh
+✓ Eye Aspect Ratio (EAR) calculation
+✓ Blink detection and counting
+✓ Drowsiness detection with configurable thresholds
+✓ Audio alert for prolonged eye closure
+✓ Head direction estimation
+✓ Eye gaze estimation with smoothing
+✓ Driver attention monitoring
+✓ Event logging to CSV
+✓ Performance profiling and latency measurement
+
+## Software Architecture
+
+Modules implemented:
+
+- main.py
+- eye_monitor.py
+- attention_monitor.py
+- performance_monitor.py
+- event_logger.py
+- utils.py
+- config.py
+
+The project follows a modular design where each module is responsible for a single functional area, improving readability, maintainability, and future extensibility.
+
+## Performance Observations
+
+Performance profiling shows:
+
+- Camera frame capture is the largest contributor to overall latency.
+- MediaPipe Face Mesh inference is the second most time-consuming stage.
+- EAR calculation, blink detection, head direction estimation, and gaze estimation introduce minimal processing overhead.
+- Overall latency is suitable for real-time driver monitoring on a standard laptop.
+
+## Engineering Highlights
+
+Throughout development, the project evolved from a simple face detection prototype into a complete driver monitoring application by:
+
+- Migrating from Haar Cascade detection to MediaPipe Face Mesh.
+- Implementing robust blink detection using Eye Aspect Ratio (EAR).
+- Developing head direction and eye gaze estimation using facial landmarks.
+- Adding event logging for offline analysis.
+- Measuring execution time of each processing stage to understand real-time system performance.
+- Refactoring the codebase into modular components to improve maintainability.
+
+## Technology Stack
+
+- Python
+- OpenCV
+- MediaPipe Face Mesh
+- NumPy
+- CSV Logging
+
+## Next Phase
+
+The Python implementation is considered the validated reference version of the project.
+
+The next development phase focuses on:
+
+- Porting the application module-by-module to Modern C++.
+- Verifying functional equivalence between Python and C++ implementations.
+- Preserving the validated algorithms while adopting production-oriented C++ design.
+- Preparing the project for TensorFlow Lite / ONNX Runtime integration and embedded deployment.
