@@ -5,3 +5,4 @@ __pycache__/
 *.tflite
 dataset/*
 !dataset/.gitkeep
+cpp/build/
