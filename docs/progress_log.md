@@ -357,3 +357,26 @@ The next development phase focuses on:
 - Verifying functional equivalence between Python and C++ implementations.
 - Preserving the validated algorithms while adopting production-oriented C++ design.
 - Preparing the project for TensorFlow Lite / ONNX Runtime integration and embedded deployment.
+
+
+###############################################################################
+## Phase 2 – Modern C++ Migration
+###############################################################################
+
+Status: In Progress
+Started: July 2026
+Reference Version: Python v1.0 (Tag: v1.0-python-dms)
+
+### Repository Restructure
+- Created separate `python/` and `cpp/` project directories.
+- Preserved Python implementation as the reference version.
+- Initialized C++ project skeleton with `src/`, `include/`, and `build/` directories.
+
+### Build System Initialization
+- Added CMake build system.
+- Configured Apple Clang with C++17.
+- Successfully built and executed the first C++ application.
+
+### Configuration Module
+- Ported `config.py` to `config.hpp`.
+- Introduced the `dms` namespace for project-wide configuration.
