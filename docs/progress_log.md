@@ -380,3 +380,6 @@ Reference Version: Python v1.0 (Tag: v1.0-python-dms)
 ### Configuration Module
 - Ported `config.py` to `config.hpp`.
 - Introduced the `dms` namespace for project-wide configuration.
+
+### Performance monitor Module
+- Ported `performance_monitor.py` to `performance_monitor.hpp` and `performance_monitor.cpp`.
