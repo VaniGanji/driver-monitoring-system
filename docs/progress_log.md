@@ -383,3 +383,6 @@ Reference Version: Python v1.0 (Tag: v1.0-python-dms)
 
 ### Performance monitor Module
 - Ported `performance_monitor.py` to `performance_monitor.hpp` and `performance_monitor.cpp`.
+
+### Event logger Module
+- Ported `event_logger.py` to `event_logger.hpp` and `event_logger.cpp`.

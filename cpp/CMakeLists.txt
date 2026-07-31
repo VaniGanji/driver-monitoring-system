@@ -10,4 +10,5 @@ include_directories(include)
 add_executable(driver_monitoring_system
     src/main.cpp
     src/performance_monitor.cpp
+    src/event_logger.cpp
 )

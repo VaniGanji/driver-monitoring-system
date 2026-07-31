@@ -63,8 +63,7 @@ void PerformanceMonitor::displayPerformance()
         std::chrono::duration<double>(
             currentTime - displayTimer).count();
 
-//    if (elapsed >= 1.0)
-     if (true)
+    if (elapsed >= 1.0)
     {
         std::cout << "--------------------------------\n";
 

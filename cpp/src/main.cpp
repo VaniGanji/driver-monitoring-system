@@ -1,8 +1,6 @@
 #include <iostream>
-#include <thread>
 
-#include "config.hpp"
-#include "performance_monitor.hpp"
+#include "event_logger.hpp"
 
 int main()
 {
@@ -12,15 +10,15 @@ int main()
     std::cout << "Version: 2.0\n";
     std::cout << "=================================\n";
 
-    dms::PerformanceMonitor perf;
+    dms::Logger logger;
 
-    perf.start("capture");
+    logger.initialize();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    logger.logEvent("Application Started");
+    logger.logEvent("Camera Initialized");
+    logger.logEvent("Face Detected");
 
-    perf.stop("capture");
-
-    perf.displayPerformance();
+    std::cout << "Logger test completed." << std::endl;
 
     return 0;
 }
