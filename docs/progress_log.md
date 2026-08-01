@@ -386,3 +386,10 @@ Reference Version: Python v1.0 (Tag: v1.0-python-dms)
 
 ### Event logger Module
 - Ported `event_logger.py` to `event_logger.hpp` and `event_logger.cpp`.
+
+### OpenCV integration
+- Integrated OpenCV 5 using CMake
+- Successfully compiled and linked OpenCV
+- Completed OpenCV smoke test
+  - Verified `cv::Mat`, drawing APIs (`cv::circle`, `cv::putText`)
+  - Verified HighGUI window (`cv::imshow`) and event handling (`cv::waitKey`)
