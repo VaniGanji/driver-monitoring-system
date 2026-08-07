@@ -393,3 +393,6 @@ Reference Version: Python v1.0 (Tag: v1.0-python-dms)
 - Completed OpenCV smoke test
   - Verified `cv::Mat`, drawing APIs (`cv::circle`, `cv::putText`)
   - Verified HighGUI window (`cv::imshow`) and event handling (`cv::waitKey`)
+
+### Utility Module
+- Ported `utils.py` to `utils.hpp` and `utils.cpp`.
