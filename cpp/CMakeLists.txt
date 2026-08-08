@@ -7,10 +7,11 @@ if(APPLE)
 endif()
 find_package(OpenCV REQUIRED)
 
+set(ONNXRUNTIME_DIR "/opt/homebrew/opt/onnxruntime")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
 
 add_executable(driver_monitoring_system
     src/main.cpp
@@ -21,7 +22,9 @@ add_executable(driver_monitoring_system
 
 target_include_directories(driver_monitoring_system
     PRIVATE
+    include
     ${OpenCV_INCLUDE_DIRS}
+    ${ONNXRUNTIME_DIR}/include
 )
 
 target_link_libraries(driver_monitoring_system
@@ -30,4 +33,5 @@ target_link_libraries(driver_monitoring_system
         opencv_imgproc
         opencv_highgui
         opencv_videoio
+        ${ONNXRUNTIME_DIR}/lib/libonnxruntime.dylib
 )

@@ -396,3 +396,55 @@ Reference Version: Python v1.0 (Tag: v1.0-python-dms)
 
 ### Utility Module
 - Ported `utils.py` to `utils.hpp` and `utils.cpp`.
+
+## ONNX Runtime Integration
+
+### Background
+
+The original Python reference implementation uses MediaPipe for face landmark / Face Mesh processing.
+
+During the C++ port, evaluated using MediaPipe directly from C++.
+The Python integration is straightforward, but a practical C++ integration
+on the current macOS development environment would introduce additional build and dependency complexity.
+
+Since this project is intended to demonstrate modern C++ development with
+an embedded/automotive-oriented deployment path, I decided to use ONNX Runtime as the C++ inference backend instead.
+
+### Decision
+
+Switched from a planned MediaPipe C++ integration to an ONNX-based inference approach.
+
+The goal is to keep the computer-vision processing portable and allow
+the landmark model to be replaced independently from the DMS application logic.
+
+The intended architecture is:
+
+    OpenCV
+       |
+       v
+    Face / Landmark Model
+       |
+       v
+    ONNX Runtime
+       |
+       v
+    Facial Landmarks
+       |
+       +----> Eye Monitoring
+       |
+       +----> Head / Attention Monitoring
+
+The actual face-landmark model integration will be implemented in a subsequent step. 
+At this stage, only the ONNX Runtime infrastructure has been integrated and verified.
+
+### ONNX Runtime Integration
+
+- Installed ONNX Runtime using Homebrew.
+- Verified ONNX Runtime C++ headers are available.
+- Verified `libonnxruntime.dylib` is available.
+- Added ONNX Runtime include path to the CMake target.
+- Added ONNX Runtime library to the CMake target.
+- Successfully rebuilt the existing C++ application.
+- Verified that the existing application continues to execute normally.
+- Added `experiments/onnxruntime_smoke_test.cpp` as a permanent reference smoke test.
+- Smoke test successfully created an `Ort::Env` instance.
