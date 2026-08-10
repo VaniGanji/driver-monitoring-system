@@ -448,3 +448,50 @@ At this stage, only the ONNX Runtime infrastructure has been integrated and veri
 - Verified that the existing application continues to execute normally.
 - Added `experiments/onnxruntime_smoke_test.cpp` as a permanent reference smoke test.
 - Smoke test successfully created an `Ort::Env` instance.
+
+## Face Landmark Model Validation – FAN2 68-Point Landmark Model
+
+### Model Selection
+- Evaluated a portable ONNX-based face landmark model for the Driver Monitoring System.
+- Selected `fan2_68_landmark.onnx`, a FAN2-based 68-point facial landmark model.
+- The model was downloaded separately and is intentionally not committed to the repository because of its size.
+
+### Model Information
+- Model: `fan2_68_landmark.onnx`
+- SHA-256:
+  `8404d6d0c1b8032faed63ab1100ced7c33e08009a0dff237b127f61fc336bda0`
+- Model input:
+  `1 x 3 x 256 x 256`
+- Model outputs:
+  - `landmarks_xyscore`: `1 x 68 x 3`
+  - `heatmaps`: `1 x 68 x 64 x 64`
+
+### Findings
+- Confirmed that the model expects a single image input in NCHW layout.
+- OpenCV images are initially represented in HWC layout, so preprocessing is required before creating the ONNX Runtime input tensor.
+- Image preprocessing used for validation:
+  - Resize input image to `256 x 256`
+  - Convert image to `float32`
+  - Normalize pixel values using `/255.0`
+  - Convert image data from HWC to CHW
+- Successfully executed inference from C++.
+- The model produced all 68 facial landmark coordinates together with landmark scores.
+- The `landmarks_xyscore` coordinates were observed in the model's `64 x 64` landmark/heatmap coordinate space.
+- A scale factor of `4` (`256 / 64`) was used to map landmark coordinates to the `256 x 256` image used for inference.
+
+### Validation
+- Added `experiments/inspect_face_landmark_model.cpp` to inspect model input/output information.
+- Added `experiments/face_landmark_inference_test.cpp` to perform standalone inference and landmark visualization.
+- Visual validation confirmed that the 68 predicted landmarks align correctly with:
+  - Jawline
+  - Eyebrows
+  - Eyes
+  - Nose
+  - Mouth
+
+### Current Status
+- FAN2 model inspection: completed
+- FAN2 model loading: validated
+- C++ inference: validated
+- 68-point landmark extraction: validated
+- Landmark visualization: validated
