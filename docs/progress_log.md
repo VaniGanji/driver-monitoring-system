@@ -495,3 +495,10 @@ At this stage, only the ONNX Runtime infrastructure has been integrated and veri
 - C++ inference: validated
 - 68-point landmark extraction: validated
 - Landmark visualization: validated
+
+### FAN2 Integration into main.cpp
+
+- Integrated the validated FAN2 landmark inference into the main C++ application.
+- Added FAN2 inference and landmark coordinate mapping to the application flow.
+- Added validation and visualization of the 68 landmarks using the original input image.
+- Verified successful execution through the main application.
