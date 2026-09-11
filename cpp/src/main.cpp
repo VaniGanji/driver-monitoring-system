@@ -10,6 +10,8 @@
 #include "eye_monitor.hpp"
 #include "config.hpp"
 
+dms::EyeMonitor eyeMonitor;
+
 namespace
 {
 
@@ -461,15 +463,19 @@ int main()
             "68 Face Landmarks Detected"
         );
 
-        double leftEAR = dms::calculateEAR(landmarks, dms::LEFT_EYE);
-        double rightEAR = dms::calculateEAR(landmarks, dms::RIGHT_EYE);
+        double leftEAR = eyeMonitor.calculateEAR(landmarks, dms::LEFT_EYE);
+
+        double rightEAR = eyeMonitor.calculateEAR(landmarks, dms::RIGHT_EYE);
 
         double averageEAR = (leftEAR + rightEAR) / 2.0;
+
+        dms::EyeStateResult eyeState = eyeMonitor.processEyeState(averageEAR);
 
         std::cout << "Left EAR    : " << leftEAR << '\n';
         std::cout << "Right EAR   : " << rightEAR << '\n';
         std::cout << "Average EAR : " << averageEAR << '\n';
-
+        std::cout << "Blink Count : " << eyeState.blinkCount << '\n';
+        std::cout << "Drowsy      : "<< (eyeState.isDrowsy ? "YES" : "NO") << '\n';
 
         //----------------------------------------------------
         // 5. Create visualization image

@@ -40,6 +40,8 @@ namespace dms
 
     constexpr int CLOSED_FRAMES_THRESHOLD = 30;
 
+    constexpr int BLINK_COUNT_RESET_SECONDS = 60;
+
     constexpr int HEAD_OFFSET_THRESHOLD = 30;
 
     constexpr int DISTRACTION_THRESHOLD = 60;
