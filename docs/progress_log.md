@@ -502,3 +502,20 @@ At this stage, only the ONNX Runtime infrastructure has been integrated and veri
 - Added FAN2 inference and landmark coordinate mapping to the application flow.
 - Added validation and visualization of the 68 landmarks using the original input image.
 - Verified successful execution through the main application.
+
+### EAR (Eye Aspect Ratio) Implementation
+
+- Ported the Python EAR calculation to C++ in the `eye_monitor` module.
+- Added FAN2-specific eye landmark mappings:
+  - Left eye: landmarks 36–41
+  - Right eye: landmarks 42–47
+- Implemented Euclidean-distance based EAR calculation using the 6-point eye topology.
+- Averaged left and right EAR values to obtain a single eye-state metric.
+- Kept the Python reference threshold unchanged:
+  - `EAR_THRESHOLD = 0.22`
+- Verified EAR behavior using open, closed, and intermediate eye-state images.
+- Observed clear separation between open and closed eye states:
+  - Open eyes: approximately `0.35–0.36`
+  - Closed eyes: approximately `0.046`
+  - Intermediate state: approximately `0.175`
+- Confirmed that the current threshold of `0.22` correctly separates open and closed states for the tested images.

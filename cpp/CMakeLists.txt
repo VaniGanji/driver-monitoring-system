@@ -18,6 +18,7 @@ add_executable(driver_monitoring_system
     src/performance_monitor.cpp
     src/event_logger.cpp
     src/utils.cpp
+    src/eye_monitor.cpp
 )
 
 target_include_directories(driver_monitoring_system

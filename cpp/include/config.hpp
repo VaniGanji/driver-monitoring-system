@@ -9,11 +9,11 @@ namespace dms
     // ============================================================
 
     constexpr std::array<int, 6> LEFT_EYE{
-        362, 385, 387, 263, 373, 380
+        36, 37, 38, 39, 40, 41
     };
 
     constexpr std::array<int, 6> RIGHT_EYE{
-        33, 160, 158, 133, 153, 144
+        42, 43, 44, 45, 46, 47
     };
 
     constexpr std::array<int, 4> LEFT_IRIS{

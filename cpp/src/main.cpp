@@ -7,6 +7,8 @@
 #include <onnxruntime/onnxruntime_cxx_api.h>
 
 #include "event_logger.hpp"
+#include "eye_monitor.hpp"
+#include "config.hpp"
 
 namespace
 {
@@ -23,11 +25,10 @@ const std::string MODEL_PATH =
     "models/face_landmark/fan2_68_landmark.onnx";
 
 const std::string TEST_IMAGE_PATH =
-    "experiments/data/test_face.jpeg";
+    "experiments/data/EAR/test_face.jpg";
 
 const std::string OUTPUT_IMAGE_PATH =
-    "experiments/data/result_test_face.jpeg";
-
+    "experiments/data/EAR/result_test_face.jpg";
 
 //------------------------------------------------------------
 // FAN2 face landmark inference
@@ -346,7 +347,7 @@ std::vector<cv::Point> runFaceLandmarkInference(
         // Print landmark information
         //----------------------------------------------------
 
-        std::cout
+        /*std::cout
             << "Landmark "
             << i
             << ": x="
@@ -355,7 +356,7 @@ std::vector<cv::Point> runFaceLandmarkInference(
             << originalY
             << ", score="
             << score
-            << '\n';
+            << '\n';*/
     }
 
 
@@ -460,6 +461,15 @@ int main()
             "68 Face Landmarks Detected"
         );
 
+        double leftEAR = dms::calculateEAR(landmarks, dms::LEFT_EYE);
+        double rightEAR = dms::calculateEAR(landmarks, dms::RIGHT_EYE);
+
+        double averageEAR = (leftEAR + rightEAR) / 2.0;
+
+        std::cout << "Left EAR    : " << leftEAR << '\n';
+        std::cout << "Right EAR   : " << rightEAR << '\n';
+        std::cout << "Average EAR : " << averageEAR << '\n';
+
 
         //----------------------------------------------------
         // 5. Create visualization image
@@ -523,6 +533,18 @@ int main()
                 1
             );
         }
+
+        std::string earText =
+        cv::format("EAR: %.3f", averageEAR);
+
+        cv::putText(
+            result,
+            earText,
+            cv::Point(30, 40),
+            cv::FONT_HERSHEY_SIMPLEX,
+            1.0,
+            cv::Scalar(0, 255, 0),
+            2);
 
 
         //----------------------------------------------------
