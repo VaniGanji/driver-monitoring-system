@@ -519,3 +519,17 @@ At this stage, only the ONNX Runtime infrastructure has been integrated and veri
   - Closed eyes: approximately `0.046`
   - Intermediate state: approximately `0.175`
 - Confirmed that the current threshold of `0.22` correctly separates open and closed states for the tested images.
+
+### FAN2 Inference Refactoring
+- Extracted FAN2 facial landmark inference from `main.cpp` into a reusable `FaceLandmarkModel` class.
+- Added dedicated `face_landmark_model.hpp` and `face_landmark_model.cpp` implementation.
+- FAN2 ONNX Runtime session is initialized once and reused for inference.
+- Confirmed detection of all 68 facial landmarks and continued EAR calculation.
+
+### Live Camera Stream
+- Replaced the static test-image input in the main application with live camera capture using OpenCV `VideoCapture`.
+- Added continuous frame acquisition and FAN2 landmark inference for each camera frame.
+- Integrated the existing `EyeMonitor` EAR calculation and temporal eye-state processing into the live camera pipeline.
+- Verified live camera capture and real-time facial landmark tracking.
+- Verified that EAR, blink count, and drowsiness processing work during live camera operation.
+- Observed reduced landmark accuracy during extreme head rotations and large upward head tilts; face ROI-based landmark inference is planned as a future improvement.
