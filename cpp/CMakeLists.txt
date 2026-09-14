@@ -19,6 +19,7 @@ add_executable(driver_monitoring_system
     src/event_logger.cpp
     src/utils.cpp
     src/eye_monitor.cpp
+    src/face_landmark_model.cpp
 )
 
 target_include_directories(driver_monitoring_system
