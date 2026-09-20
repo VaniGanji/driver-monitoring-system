@@ -533,3 +533,62 @@ At this stage, only the ONNX Runtime infrastructure has been integrated and veri
 - Verified live camera capture and real-time facial landmark tracking.
 - Verified that EAR, blink count, and drowsiness processing work during live camera operation.
 - Observed reduced landmark accuracy during extreme head rotations and large upward head tilts; face ROI-based landmark inference is planned as a future improvement.
+
+
+## YuNet Face Detection + FAN2 Landmark Integration
+
+### Objective
+Replace the previous face/landmark input path with a YuNet face detector
+and use the detected face ROI as the input to the FAN2 68-landmark model.
+
+### Implemented
+
+- Integrated OpenCV YuNet face detection.
+- Added the YuNet face detection model:
+  - `models/face_detection/face_detection_yunet_2026may.onnx`
+- Initialized the face detector once before entering the camera loop.
+- Configured YuNet with:
+  - Score threshold: `0.6`
+  - NMS threshold: `0.3`
+  - Top-K: `5000`
+- Added validation for the detected face bounding box.
+- Extracted the detected face ROI from the camera frame.
+- Passed the face ROI to the FAN2 landmark model.
+
+### FAN2 ROI Preprocessing
+
+The initial rectangular face ROI was directly resized to the 256 × 256 FAN2 input size.
+
+This caused geometric distortion when the YuNet bounding box was significantly wider or taller than a square.
+
+The preprocessing was therefore changed to:
+
+1. Determine the larger of ROI width and height.
+2. Create a square image using zero padding.
+3. Keep the original face ROI undistorted.
+4. Resize the square image to 256 × 256.
+5. Run FAN2 inference.
+6. Convert FAN2 landmark coordinates back to the padded square.
+7. Remove the padding to obtain coordinates relative to the original face ROI.
+
+### Coordinate Handling
+
+FAN2 landmarks returned by `FaceLandmarkModel::infer()` are ROI-relative.
+
+The main camera loop converts them to full-frame coordinates by adding the YuNet bounding-box origin:
+`framePoint = roiPoint + faceBox origin`
+
+This keeps the landmark model independent of the camera-frame coordinate
+system.
+
+### Validation
+
+Live camera testing was performed using the Mac camera.
+
+Observed results:
+
+- Face detection works during the live camera stream.
+- FAN2 landmarks are significantly more stable after square-padding preprocessing.
+- Normal and moderate head poses produce visually consistent landmarks.
+- EAR calculation and blink/drowsiness processing continue to operate using the FAN2 landmarks.
+- Extreme upward head pose still causes changes in the YuNet bounding box and corresponding landmark movement.

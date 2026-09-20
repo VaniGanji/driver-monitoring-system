@@ -2,7 +2,7 @@
 
 #include <array>
 #include <iostream>
-#include <stdexcept>
+#include <algorithm>
 
 namespace dms
 {
@@ -37,20 +37,61 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
     }
 
     //--------------------------------------------------------
-    // 1. Resize image to FAN2 input size
+    // 1. Create square image without distorting the ROI
+    //--------------------------------------------------------
+
+    const int width =
+        frame.cols;
+
+    const int height =
+        frame.rows;
+
+    const int squareSize =
+        std::max(width, height);
+
+    const int padLeft =
+        (squareSize - width) / 2;
+
+    const int padRight =
+        squareSize -
+        width -
+        padLeft;
+
+    const int padTop =
+        (squareSize - height) / 2;
+
+    const int padBottom =
+        squareSize -
+        height -
+        padTop;
+
+    cv::Mat squareImage;
+
+    cv::copyMakeBorder(
+        frame,
+        squareImage,
+        padTop,
+        padBottom,
+        padLeft,
+        padRight,
+        cv::BORDER_CONSTANT,
+        cv::Scalar(0, 0, 0));
+
+    //--------------------------------------------------------
+    // 2. Resize square image to FAN2 input size
     //--------------------------------------------------------
 
     cv::Mat resized;
 
     cv::resize(
-        frame,
+        squareImage,
         resized,
         cv::Size(
             MODEL_INPUT_SIZE,
             MODEL_INPUT_SIZE));
 
     //--------------------------------------------------------
-    // 2. Convert image to float32
+    // 3. Convert image to float32
     //    Normalize pixel values to [0, 1]
     //--------------------------------------------------------
 
@@ -62,11 +103,12 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
         1.0 / 255.0);
 
     //--------------------------------------------------------
-    // 3. Convert OpenCV HWC → FAN2 NCHW
+    // 4. Convert OpenCV HWC → FAN2 NCHW
     //--------------------------------------------------------
 
     const int channelSize =
-        MODEL_INPUT_SIZE * MODEL_INPUT_SIZE;
+        MODEL_INPUT_SIZE *
+        MODEL_INPUT_SIZE;
 
     std::vector<float> inputTensorValues(
         MODEL_CHANNELS * channelSize);
@@ -99,9 +141,9 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
     }
 
     //--------------------------------------------------------
-    // 4. Define FAN2 input tensor shape
+    // 5. Define FAN2 input tensor shape
     //
-    //     1 × 3 × 256 × 256
+    //    1 × 3 × 256 × 256
     //--------------------------------------------------------
 
     std::array<int64_t, 4> inputShape =
@@ -113,7 +155,7 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
     };
 
     //--------------------------------------------------------
-    // 5. Create CPU memory information
+    // 6. Create CPU memory information
     //--------------------------------------------------------
 
     Ort::MemoryInfo memoryInfo =
@@ -122,7 +164,7 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
             OrtMemTypeDefault);
 
     //--------------------------------------------------------
-    // 6. Create ONNX input tensor
+    // 7. Create ONNX input tensor
     //--------------------------------------------------------
 
     Ort::Value inputTensor =
@@ -134,7 +176,7 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
             inputShape.size());
 
     //--------------------------------------------------------
-    // 7. Get model input/output names
+    // 8. Get model input/output names
     //--------------------------------------------------------
 
     Ort::AllocatorWithDefaultOptions allocator;
@@ -160,7 +202,7 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
     };
 
     //--------------------------------------------------------
-    // 8. Run FAN2 inference
+    // 9. Run FAN2 inference
     //--------------------------------------------------------
 
     auto outputs =
@@ -173,32 +215,33 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
             1);
 
     //--------------------------------------------------------
-    // 9. Get landmark output data
+    // 10. Get landmark output
     //--------------------------------------------------------
 
     float* landmarkData =
         outputs[0].GetTensorMutableData<float>();
 
     //--------------------------------------------------------
-    // 10. Map FAN2 coordinates back to original image
+    // 11. FAN2 output coordinates
+    //
+    //     FAN2 coordinates are assumed to be in 64×64.
+    //     64 → 256 means ×4.
+    //
+    //     The 256×256 image corresponds to squareImage.
     //--------------------------------------------------------
 
-    const double scaleX =
-        static_cast<double>(frame.cols) /
+    const double squareScale =
+        static_cast<double>(squareSize) /
         MODEL_INPUT_SIZE;
 
-    const double scaleY =
-        static_cast<double>(frame.rows) /
-        MODEL_INPUT_SIZE;
+    //--------------------------------------------------------
+    // 12. Map all landmarks back to original ROI
+    //--------------------------------------------------------
 
     std::vector<cv::Point> landmarks;
 
     landmarks.reserve(
         LANDMARK_COUNT);
-
-    //--------------------------------------------------------
-    // 11. Extract and map all 68 landmarks
-    //--------------------------------------------------------
 
     for (int i = 0;
          i < LANDMARK_COUNT;
@@ -211,22 +254,38 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
             landmarkData[i * 3 + 1];
 
         //----------------------------------------------------
-        // FAN2 coordinates are in 64x64 space.
-        //
-        // 64 → 256 → original image
+        // FAN2 64×64 → 256×256
+        //----------------------------------------------------
+
+        const double squareX =
+            modelX * 4.0;
+
+        const double squareY =
+            modelY * 4.0;
+
+        //----------------------------------------------------
+        // 256×256 → padded square image
+        //----------------------------------------------------
+
+        const double paddedX =
+            squareX * squareScale;
+
+        const double paddedY =
+            squareY * squareScale;
+
+        //----------------------------------------------------
+        // Remove padding → original ROI coordinates
         //----------------------------------------------------
 
         const int originalX =
             static_cast<int>(
-                modelX *
-                4.0 *
-                scaleX);
+                paddedX -
+                padLeft);
 
         const int originalY =
             static_cast<int>(
-                modelY *
-                4.0 *
-                scaleY);
+                paddedY -
+                padTop);
 
         landmarks.emplace_back(
             originalX,
@@ -236,4 +295,4 @@ std::vector<cv::Point> FaceLandmarkModel::infer(
     return landmarks;
 }
 
-} // namespace dms
+}

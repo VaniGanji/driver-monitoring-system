@@ -7,4 +7,4 @@ dataset/*
 !dataset/.gitkeep
 cpp/build/
 experiments/data/*
-models/face_landmark/fan2_68_landmark.onnx
+models/*

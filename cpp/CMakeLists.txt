@@ -20,6 +20,7 @@ add_executable(driver_monitoring_system
     src/utils.cpp
     src/eye_monitor.cpp
     src/face_landmark_model.cpp
+    src/face_detector.cpp
 )
 
 target_include_directories(driver_monitoring_system
@@ -35,5 +36,6 @@ target_link_libraries(driver_monitoring_system
         opencv_imgproc
         opencv_highgui
         opencv_videoio
+        opencv_objdetect
         ${ONNXRUNTIME_DIR}/lib/libonnxruntime.dylib
 )
