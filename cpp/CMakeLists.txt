@@ -21,6 +21,7 @@ add_executable(driver_monitoring_system
     src/eye_monitor.cpp
     src/face_landmark_model.cpp
     src/face_detector.cpp
+    src/attention_monitor.cpp
 )
 
 target_include_directories(driver_monitoring_system

@@ -592,3 +592,14 @@ Observed results:
 - Normal and moderate head poses produce visually consistent landmarks.
 - EAR calculation and blink/drowsiness processing continue to operate using the FAN2 landmarks.
 - Extreme upward head pose still causes changes in the YuNet bounding box and corresponding landmark movement.
+
+**## Driver Attention State**
+
+**### Completed**
+- Implemented head direction estimation using FAN2 68 facial landmarks.
+- Tuned neutral offset and separate left/right thresholds to reduce false detections caused by minor head movements.
+- Implemented a distraction frame counter to track sustained head turns.
+- Triggered a visual distraction alert when the configured threshold of 60 frames was exceeded.
+
+**### Outcome**
+- Successfully integrated head direction estimation and distraction alerting into the pipeline.

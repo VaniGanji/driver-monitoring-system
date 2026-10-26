@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
+#include <atomic>
 
 #include <opencv2/opencv.hpp>
 #include <onnxruntime/onnxruntime_cxx_api.h>
@@ -10,6 +12,9 @@
 #include "eye_monitor.hpp"
 #include "face_detector.hpp"
 #include "face_landmark_model.hpp"
+#include "utils.hpp"
+#include "attention_monitor.hpp"
+
 
 namespace
 {
@@ -22,6 +27,10 @@ const std::string WINDOW_NAME =
     "Driver Monitoring System";
 
 dms::EyeMonitor eyeMonitor;
+
+std::atomic<bool> alarmOn{false};
+
+int distractedFrames = 0;
 }
 
 int main()
@@ -139,7 +148,7 @@ int main()
                 // Debug output
                 //--------------------------------------------------------
 
-                if (!landmarks.empty())
+                /*if (!landmarks.empty())
                 {
                     const int debugIndices[] =
                     {
@@ -159,7 +168,7 @@ int main()
                     }
 
                     std::cout << "\n";
-                }
+                }*/
 
                 //--------------------------------------------------------
                 // Draw YuNet bounding box
@@ -259,7 +268,7 @@ int main()
                     "Blink Count: " +
                         std::to_string(
                             eyeState.blinkCount),
-                    cv::Point(20, 125),
+                    cv::Point(20, 120),
                     cv::FONT_HERSHEY_SIMPLEX,
                     0.7,
                     cv::Scalar(255, 255, 0),
@@ -268,6 +277,24 @@ int main()
                 // --------------------------------------------------
                 // 11. Drowsiness
                 // --------------------------------------------------
+
+                if (eyeState.isDrowsy)
+                {
+                    if (!alarmOn.load())
+                    {
+                        alarmOn.store(true);
+
+                        std::thread([]()
+                        {
+                            dms::playAlarm();
+                            alarmOn.store(false);
+                        }).detach();
+                    }
+                }
+                else
+                {
+                    alarmOn.store(false);
+                }
 
                 const std::string drowsyText =
                     eyeState.isDrowsy
@@ -282,11 +309,54 @@ int main()
                 cv::putText(
                     frame,
                     drowsyText,
-                    cv::Point(20, 160),
+                    cv::Point(20, 150),
                     cv::FONT_HERSHEY_SIMPLEX,
                     0.8,
                     drowsyColor,
                     2);
+
+                // --------------------------------------------------
+                // 12. Head direction and gaze estimation
+                // --------------------------------------------------
+
+                // Head direction estimation
+                const std::string headDirection =
+                    dms::estimateHeadDirection(
+                        landmarks);
+
+                // Display head direction
+                cv::putText(
+                    frame,
+                    "Head: " + headDirection,
+                    cv::Point(20, 180),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    cv::Scalar(0, 255, 255),
+                    2);
+
+                // Count frames with the head turned
+                if (headDirection == "Head Left" ||
+                    headDirection == "Head Right")
+                {
+                    ++distractedFrames;
+                }
+                else
+                {
+                    distractedFrames = 0;
+                }
+
+                // Display distraction alert after the threshold
+                if (distractedFrames > dms::DISTRACTION_THRESHOLD)
+                {
+                    cv::putText(
+                        frame,
+                        "DISTRACTION ALERT!",
+                        cv::Point(20, 210),
+                        cv::FONT_HERSHEY_SIMPLEX,
+                        1.0,
+                        cv::Scalar(0, 0, 255),
+                        3);
+                }
             }
             else
             {
