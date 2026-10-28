@@ -1,10 +1,21 @@
-Timestamp,Event
-2026-07-31 23:38:59,Application Started
-2026-07-31 23:38:59,Camera Initialized
-2026-07-31 23:38:59,Face Detected
-2026-07-31 23:41:58,Application Started
-2026-07-31 23:41:58,Camera Initialized
-2026-07-31 23:41:58,Face Detected
-2026-07-31 23:48:21,Application Started
-2026-07-31 23:48:21,Camera Initialized
-2026-07-31 23:48:21,Face Detected
+Timestamp,Event,Details
+2026-10-28 12:39:16,"Application Started: Live camera DMS starting"
+2026-10-28 12:39:17,"Camera Initialized"
+2026-10-28 12:39:17,"Face Detected"
+2026-10-28 12:39:18,"Head Direction: Head Forward"
+2026-10-28 12:39:25,"Head Direction: Head Left"
+2026-10-28 12:39:27,"Head Direction: Head Forward"
+2026-10-28 12:39:28,"Head Direction: Head Right"
+2026-10-28 12:39:31,"Head Direction: Head Forward"
+2026-10-28 12:39:33,"Head Direction: Head Left"
+2026-10-28 12:39:43,"Head Direction: Head Forward"
+2026-10-28 12:39:49,"Drowsiness Detected"
+2026-10-28 12:40:04,"Drowsiness Cleared"
+2026-10-28 12:40:08,"Head Direction: Head Left"
+2026-10-28 12:40:09,"Head Direction: Head Forward"
+2026-10-28 12:40:12,"Face Lost"
+2026-10-28 12:40:16,"Face Detected"
+2026-10-28 12:40:16,"Head Direction: Head Forward"
+2026-10-28 12:40:18,"Head Direction: Head Left"
+2026-10-28 12:40:20,"Head Direction: Head Forward"
+2026-10-28 12:40:28,"Application Shutdown"

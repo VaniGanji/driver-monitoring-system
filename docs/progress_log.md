@@ -603,3 +603,36 @@ Observed results:
 
 **### Outcome**
 - Successfully integrated head direction estimation and distraction alerting into the pipeline.
+
+
+# Event Logging
+
+## Objective
+Implemented an event-driven logging system to record significant Driver Monitoring System events with timestamps. The logging mechanism captures only meaningful state transitions, avoiding duplicate entries for every video frame.
+
+## Completed Tasks
+- Added logging for camera initialization, face detection and loss, head-direction changes, drowsiness and application shutdown.
+
+## Sample Output
+## csv
+Timestamp,Event,Details
+2026-10-28 12:39:16,"Application Started: Live camera DMS starting"
+2026-10-28 12:39:17,"Camera Initialized"
+2026-10-28 12:39:17,"Face Detected"
+2026-10-28 12:39:18,"Head Direction: Head Forward"
+2026-10-28 12:39:25,"Head Direction: Head Left"
+2026-10-28 12:39:27,"Head Direction: Head Forward"
+2026-10-28 12:39:28,"Head Direction: Head Right"
+2026-10-28 12:39:31,"Head Direction: Head Forward"
+2026-10-28 12:39:33,"Head Direction: Head Left"
+2026-10-28 12:39:43,"Head Direction: Head Forward"
+2026-10-28 12:39:49,"Drowsiness Detected"
+2026-10-28 12:40:04,"Drowsiness Cleared"
+2026-10-28 12:40:08,"Head Direction: Head Left"
+2026-10-28 12:40:09,"Head Direction: Head Forward"
+2026-10-28 12:40:12,"Face Lost"
+2026-10-28 12:40:16,"Face Detected"
+2026-10-28 12:40:16,"Head Direction: Head Forward"
+2026-10-28 12:40:18,"Head Direction: Head Left"
+2026-10-28 12:40:20,"Head Direction: Head Forward"
+2026-10-28 12:40:28,"Application Shutdown"

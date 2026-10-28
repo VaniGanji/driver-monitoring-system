@@ -35,6 +35,10 @@ int distractedFrames = 0;
 
 int main()
 {
+    // Initialize event logger
+    dms::Logger logger;
+    logger.initialize();
+
     try
     {
         std::cout << "=================================\n";
@@ -43,10 +47,7 @@ int main()
         std::cout << "Version: 2.0\n";
         std::cout << "=================================\n";
 
-        // Initialize logger
-        dms::Logger logger;
-        logger.initialize();
-        logger.logEvent("Starting live camera DMS");
+        logger.logEvent("Application Started: Live camera DMS starting");
 
         const std::string detectorModelPath =
             "models/face_detection/"
@@ -73,8 +74,12 @@ int main()
         if (!camera.isOpened())
         {
             std::cerr << "ERROR: Could not open camera.\n";
+            logger.logEvent("Camera Initialization Failed");
+            logger.logEvent("Application Shutdown: camera initialization failed");
             return 1;
         }
+
+        logger.logEvent("Camera Initialized");
 
         camera.set(
             cv::CAP_PROP_FRAME_WIDTH,
@@ -88,6 +93,11 @@ int main()
         std::cout << "Press 'q' to quit.\n";
 
         cv::Mat frame;
+
+        // State used to log transitions, rather than repeating events every frame.
+        bool faceWasDetected = false;
+        bool wasDrowsy = false;
+        std::string previousHeadDirection = "Unknown";
 
         while (true)
         {
@@ -108,6 +118,18 @@ int main()
                 faceDetector.detect(
                     frame,
                     faceDetection);
+
+            // Log face detection/loss only when the state changes.
+            if (faceDetected && !faceWasDetected)
+            {
+                logger.logEvent("Face Detected");
+            }
+            else if (!faceDetected && faceWasDetected)
+            {
+                logger.logEvent("Face Lost");
+                previousHeadDirection = "Unknown";
+            }
+            faceWasDetected = faceDetected;
 
             if (faceDetected)
             {
@@ -278,12 +300,22 @@ int main()
                 // 11. Drowsiness
                 // --------------------------------------------------
 
+                // Log drowsiness transitions, not every frame.
+                if (eyeState.isDrowsy && !wasDrowsy)
+                {
+                    logger.logEvent("Drowsiness Detected");
+                }
+                else if (!eyeState.isDrowsy && wasDrowsy)
+                {
+                    logger.logEvent("Drowsiness Cleared");
+                }
+                wasDrowsy = eyeState.isDrowsy;
+
                 if (eyeState.isDrowsy)
                 {
                     if (!alarmOn.load())
                     {
                         alarmOn.store(true);
-
                         std::thread([]()
                         {
                             dms::playAlarm();
@@ -295,6 +327,7 @@ int main()
                 {
                     alarmOn.store(false);
                 }
+
 
                 const std::string drowsyText =
                     eyeState.isDrowsy
@@ -316,13 +349,19 @@ int main()
                     2);
 
                 // --------------------------------------------------
-                // 12. Head direction and gaze estimation
+                // 12. Head direction estimation
                 // --------------------------------------------------
 
                 // Head direction estimation
                 const std::string headDirection =
                     dms::estimateHeadDirection(
                         landmarks);
+
+                if (headDirection != previousHeadDirection)
+                {
+                    logger.logEvent("Head Direction: " + headDirection);
+                    previousHeadDirection = headDirection;
+                }
 
                 // Display head direction
                 cv::putText(
@@ -360,6 +399,14 @@ int main()
             }
             else
             {
+                // Log only when a previously detected face disappears.
+                if (faceWasDetected)
+                {
+                    logger.logEvent("Face Lost");
+                }
+
+                faceWasDetected = false;
+
                 cv::putText(
                     frame,
                     "No face detected",
@@ -390,6 +437,8 @@ int main()
         camera.release();
         cv::destroyAllWindows();
 
+        logger.logEvent("Application Shutdown");
+
         std::cout << "\nLive camera test completed.\n";
 
         return 0;
@@ -400,6 +449,7 @@ int main()
             << "ONNX Runtime error: "
             << exception.what()
             << '\n';
+        logger.logEvent("Application Shutdown: ONNX Runtime error: " + std::string(exception.what()));
 
         return 1;
     }
@@ -409,6 +459,8 @@ int main()
             << "OpenCV error: "
             << exception.what()
             << '\n';
+        logger.logEvent(
+            "Application Shutdown: OpenCV error: " + std::string(exception.what()));
 
         return 1;
     }
@@ -418,6 +470,8 @@ int main()
             << "Error: "
             << exception.what()
             << '\n';
+        logger.logEvent(
+            "Application Shutdown: std::exception: " + std::string(exception.what()));
 
         return 1;
     }
