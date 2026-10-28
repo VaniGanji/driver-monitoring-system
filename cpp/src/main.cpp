@@ -206,7 +206,7 @@ int main()
                 // Convert ROI coordinates → frame coordinates
                 //--------------------------------------------------------
 
-                for (const cv::Point& point : landmarks)
+                /*for (const cv::Point& point : landmarks)
                 {
                     const cv::Point framePoint =
                         point +
@@ -220,6 +220,27 @@ int main()
                         2,
                         cv::Scalar(0, 255, 0),
                         -1);
+                }*/
+
+                // Convert ROI-relative landmarks to full-frame coordinates.
+                std::vector<cv::Point> frameLandmarks;
+                frameLandmarks.reserve(landmarks.size());
+
+                for (const cv::Point& point : landmarks)
+                {
+                    frameLandmarks.emplace_back(
+                        point.x + faceBox.x,
+                        point.y + faceBox.y);
+                }
+
+                if (dms::SHOW_LANDMARK_IDS || dms::SHOW_LANDMARK_POINTS)
+                {
+                    dms::drawLandmarkDebug(
+                        frame,
+                        frameLandmarks,
+                        dms::SHOW_LANDMARK_IDS,
+                        dms::SHOW_LANDMARK_POINTS
+                    );
                 }
 
                 // --------------------------------------------------

@@ -5,19 +5,6 @@
 namespace dms
 {
 
-namespace
-{
-
-const std::vector<int> IMPORTANT_POINTS =
-{
-    1,
-    33,133,
-    362,263,
-    469,470,471,472,
-    474,475,476,477
-};
-
-} // anonymous namespace
 
 void drawLandmarkDebug(
     cv::Mat& frame,
@@ -25,31 +12,33 @@ void drawLandmarkDebug(
     bool showIds,
     bool showPoints)
 {
-    for (int idx : IMPORTANT_POINTS)
+    for (std::size_t idx = 0; idx < landmarks.size(); ++idx)
     {
-        if (idx >= landmarks.size())
-            continue;
-
         const cv::Point& point = landmarks[idx];
 
         if (showPoints)
         {
-            cv::circle(frame,
-                       point,
-                       4,
-                       cv::Scalar(0, 0, 255),
-                       -1);
+            cv::circle(
+                frame,
+                point,
+                2,
+                cv::Scalar(0, 255, 0),
+                cv::FILLED
+            );
         }
 
         if (showIds)
         {
-            cv::putText(frame,
-                        std::to_string(idx),
-                        point,
-                        cv::FONT_HERSHEY_SIMPLEX,
-                        0.3,
-                        cv::Scalar(0, 255, 255),
-                        1);
+            cv::putText(
+                frame,
+                std::to_string(idx),
+                cv::Point(point.x + 3, point.y - 3),
+                cv::FONT_HERSHEY_SIMPLEX,
+                0.35,
+                cv::Scalar(0, 255, 255),
+                1,
+                cv::LINE_AA
+            );
         }
     }
 }

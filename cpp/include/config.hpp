@@ -16,22 +16,6 @@ namespace dms
         42, 43, 44, 45, 46, 47
     };
 
-    constexpr std::array<int, 4> LEFT_IRIS{
-        474, 475, 476, 477
-    };
-
-    constexpr std::array<int, 4> RIGHT_IRIS{
-        469, 470, 471, 472
-    };
-
-    constexpr int LEFT_EYE_LEFT  = 33;
-    constexpr int LEFT_EYE_RIGHT = 133;
-
-    constexpr int RIGHT_EYE_LEFT  = 362;
-    constexpr int RIGHT_EYE_RIGHT = 263;
-
-    constexpr int NOSE_TIP = 1;
-
     // ============================================================
     // Detection Thresholds
     // ============================================================
@@ -46,14 +30,13 @@ namespace dms
 
     constexpr int DISTRACTION_THRESHOLD = 60;
 
-    constexpr double GAZE_LEFT_THRESHOLD  = 0.30;
-    constexpr double GAZE_RIGHT_THRESHOLD = 0.70;
-
     // ============================================================
     // Debug Configuration
     // ============================================================
 
+    // Landmark Visualization & Debugging
     constexpr bool SHOW_LANDMARK_IDS = false;
+    constexpr bool SHOW_LANDMARK_POINTS = true;
 
     constexpr bool SHOW_PERFORMANCE = true;
 
