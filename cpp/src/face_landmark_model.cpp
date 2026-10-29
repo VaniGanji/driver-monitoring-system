@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include <onnxruntime/coreml_provider_factory.h>
+
 namespace dms
 {
 
@@ -18,6 +20,17 @@ FaceLandmarkModel::FaceLandmarkModel(
 {
     sessionOptions_.SetGraphOptimizationLevel(
         GraphOptimizationLevel::ORT_ENABLE_BASIC);
+
+    std::cout << "[FAN2] Registering Core ML provider..."
+              << std::endl;
+
+    Ort::ThrowOnError(
+        OrtSessionOptionsAppendExecutionProvider_CoreML(
+            sessionOptions_,
+            COREML_FLAG_USE_NONE));
+
+    std::cout << "[FAN2] Core ML provider registered."
+              << std::endl;
 
     session_ = Ort::Session(
         env_,

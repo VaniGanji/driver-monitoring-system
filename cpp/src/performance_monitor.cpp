@@ -70,24 +70,24 @@ void PerformanceMonitor::displayPerformance()
         std::cout << std::fixed << std::setprecision(2);
 
         std::cout << "Capture          : "
-                  << get("capture")
-                  << " ms\n";
+                  << get("capture") << " ms\n";
 
-        std::cout << "FaceMesh         : "
-                  << get("face_mesh")
-                  << " ms\n";
+        std::cout << "YuNet Detection  : "
+                  << get("face_detection") << " ms\n";
 
-        std::cout << "EyeMonitor       : "
-                  << get("eye_monitor")
-                  << " ms\n";
+        std::cout << "FAN2 Landmarks   : "
+                  << get("fan2_landmarks") << " ms\n";
 
-        std::cout << "AttentionMonitor : "
-                  << get("attention_monitor")
-                  << " ms\n";
+        std::cout << std::fixed << std::setprecision(6)
+                  << "EyeMonitor       : "
+                  << get("eye_monitor") << " ms\n";
+
+        std::cout << std::fixed << std::setprecision(6)
+                  << "AttentionMonitor : "
+                  << get("attention_monitor") << " ms\n";
 
         std::cout << "Total            : "
-                  << total()
-                  << " ms\n";
+                 << total() << " ms\n";
 
         displayTimer = currentTime;
     }

@@ -14,6 +14,7 @@
 #include "face_landmark_model.hpp"
 #include "utils.hpp"
 #include "attention_monitor.hpp"
+#include "performance_monitor.hpp"
 
 
 namespace
@@ -41,6 +42,8 @@ int main()
 
     double fpsTimer =
         static_cast<double>(cv::getTickCount()) / cv::getTickFrequency();
+    
+    dms::PerformanceMonitor perf;
 
     try
     {
@@ -104,7 +107,11 @@ int main()
 
         while (true)
         {
+            perf.reset();
+
+            perf.start("capture");
             camera >> frame;
+            perf.stop("capture");
 
             if (frame.empty())
             {
@@ -117,10 +124,12 @@ int main()
 
             dms::FaceDetection faceDetection;
 
+            perf.start("face_detection");
             const bool faceDetected =
                 faceDetector.detect(
                     frame,
                     faceDetection);
+            perf.stop("face_detection");
 
             // Log face detection/loss only when the state changes.
             if (faceDetected && !faceWasDetected)
@@ -166,34 +175,10 @@ int main()
                 // Returned landmarks are ROI-relative.
                 //--------------------------------------------------------
 
+                perf.start("fan2_landmarks");
                 const std::vector<cv::Point> landmarks =
                     faceLandmarkModel.infer(faceROI);
-
-                //--------------------------------------------------------
-                // Debug output
-                //--------------------------------------------------------
-
-                /*if (!landmarks.empty())
-                {
-                    const int debugIndices[] =
-                    {
-                        0, 10, 20, 30, 40, 50, 60, 67
-                    };
-
-                    std::cout << "LIVE landmarks: ";
-
-                    for (int index : debugIndices)
-                    {
-                        std::cout
-                            << "[" << index << ": "
-                            << landmarks[index].x
-                            << ","
-                            << landmarks[index].y
-                            << "] ";
-                    }
-
-                    std::cout << "\n";
-                }*/
+                perf.stop("fan2_landmarks");
 
                 //--------------------------------------------------------
                 // Draw YuNet bounding box
@@ -208,22 +193,6 @@ int main()
                 //--------------------------------------------------------
                 // Convert ROI coordinates → frame coordinates
                 //--------------------------------------------------------
-
-                /*for (const cv::Point& point : landmarks)
-                {
-                    const cv::Point framePoint =
-                        point +
-                        cv::Point(
-                            faceBox.x,
-                            faceBox.y);
-
-                    cv::circle(
-                        frame,
-                        framePoint,
-                        2,
-                        cv::Scalar(0, 255, 0),
-                        -1);
-                }*/
 
                 // Convert ROI-relative landmarks to full-frame coordinates.
                 std::vector<cv::Point> frameLandmarks;
@@ -247,9 +216,10 @@ int main()
                 }
 
                 // --------------------------------------------------
-                // 6. Calculate EAR
+                // 6. Calculate EAR & Process temporal eye state
                 // --------------------------------------------------
 
+                perf.start("eye_monitor");
                 const double leftEAR =
                     eyeMonitor.calculateEAR(
                         landmarks,
@@ -263,17 +233,11 @@ int main()
                 const double averageEAR =
                     (leftEAR + rightEAR) / 2.0;
 
-                // --------------------------------------------------
-                // 7. Process temporal eye state
-                // --------------------------------------------------
-
                 const dms::EyeStateResult eyeState =
                     eyeMonitor.processEyeState(
                         averageEAR);
 
-                // --------------------------------------------------
-                // 9. Display EAR
-                // --------------------------------------------------
+                perf.stop("eye_monitor");
 
                 cv::putText(
                     frame,
@@ -376,11 +340,12 @@ int main()
                 // 12. Head direction estimation
                 // --------------------------------------------------
 
-                // Head direction estimation
+                perf.start("attention_monitor");
                 const std::string headDirection =
                     dms::estimateHeadDirection(
                         landmarks);
-
+                perf.stop("attention_monitor");
+                
                 if (headDirection != previousHeadDirection)
                 {
                     logger.logEvent("Head Direction: " + headDirection);
@@ -441,9 +406,12 @@ int main()
                     2);
             }
 
-            // Calculate and display Frames Per Second (FPS)
+            // Performance monitoring
             if (dms::SHOW_PERFORMANCE)
             {
+                perf.displayPerformance();
+
+                // Calculate and display Frames Per Second (FPS)
                 const double fps = dms::calculateFPS(fpsTimer);
 
                 std::ostringstream fpsText;

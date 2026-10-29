@@ -649,3 +649,37 @@ Implemented configurable FPS calculation to establish an initial performance bas
 **### Outcome**
 - Face detected: approximately 5–8 FPS, each frame takes roughly 125–200 ms.
 - Face not detected: approximately 15–19 FPS, each frame takes roughly 53–67 ms.
+
+# Performance profiling
+
+## Initial metrics
+--------------------------------
+Capture          : 13.21 ms
+YuNet Detection  : 4.99 ms
+FAN2 Landmarks   : 95.13 ms
+EyeMonitor       : 0.001083 ms
+AttentionMonitor : 0.000667 ms
+Total            : 113.326250 ms
+--------------------------------
+
+## FAN2 Core ML Optimization
+
+- **Initial issue:** FAN2 inference took approximately 90–100 ms.
+- **Optimization:** Enabled ONNX Runtime's Core ML Execution Provider on macOS.
+- **Verification:** Runtime logs showed 3 nodes assigned to Core ML and 17 to CPU.
+- **Result:** Typical inference improved to approximately 6–9 ms.
+- **Outcome:** Significant latency improvement observed on the Mac.
+- **Embedded relevance:** Similar optimization is possible on suitable automotive ECUs using hardware-specific inference runtimes.
+
+## Performance metrics after Core ML enabled
+--------------------------------
+Capture          : 34.20 ms
+YuNet Detection  : 6.11 ms
+FAN2 Landmarks   : 13.15 ms
+EyeMonitor       : 0.001083 ms
+AttentionMonitor : 0.000709 ms
+Total            : 53.457583 ms
+--------------------------------
+
+## Observation
+- Capture time is slightly increased after Core ML enabled but FAN2 inference time is significantly reduced, resulting to doubled fps.
