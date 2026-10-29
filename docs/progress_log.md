@@ -636,3 +636,16 @@ Timestamp,Event,Details
 2026-10-28 12:40:18,"Head Direction: Head Left"
 2026-10-28 12:40:20,"Head Direction: Head Forward"
 2026-10-28 12:40:28,"Application Shutdown"
+
+# FPS Monitoring
+
+## Objective
+Implemented configurable FPS calculation to establish an initial performance baseline.
+
+**### Completed**
+- Reused the existing calculateFPS() utility.
+- Updated FPS calculation to run once per frame, regardless of face detection.
+
+**### Outcome**
+- Face detected: approximately 5–8 FPS, each frame takes roughly 125–200 ms.
+- Face not detected: approximately 15–19 FPS, each frame takes roughly 53–67 ms.

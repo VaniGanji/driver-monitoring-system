@@ -39,6 +39,9 @@ int main()
     dms::Logger logger;
     logger.initialize();
 
+    double fpsTimer =
+        static_cast<double>(cv::getTickCount()) / cv::getTickFrequency();
+
     try
     {
         std::cout << "=================================\n";
@@ -436,6 +439,26 @@ int main()
                     0.8,
                     cv::Scalar(0, 0, 255),
                     2);
+            }
+
+            // Calculate and display Frames Per Second (FPS)
+            if (dms::SHOW_PERFORMANCE)
+            {
+                const double fps = dms::calculateFPS(fpsTimer);
+
+                std::ostringstream fpsText;
+                fpsText << "FPS: " << std::fixed
+                        << std::setprecision(1) << fps;
+
+                cv::putText(
+                    frame,
+                    fpsText.str(),
+                    cv::Point(20, 240),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    cv::Scalar(255, 255, 0),
+                    2
+                );
             }
 
             // --------------------------------------------------
