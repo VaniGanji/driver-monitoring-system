@@ -667,7 +667,7 @@ Total            : 113.326250 ms
 - **Initial issue:** FAN2 inference took approximately 90–100 ms.
 - **Optimization:** Enabled ONNX Runtime's Core ML Execution Provider on macOS.
 - **Verification:** Runtime logs showed 3 nodes assigned to Core ML and 17 to CPU.
-- **Result:** Typical inference improved to approximately 6–9 ms.
+- **Result:** Typical inference improved to approximately 10–20 ms.
 - **Outcome:** Significant latency improvement observed on the Mac.
 - **Embedded relevance:** Similar optimization is possible on suitable automotive ECUs using hardware-specific inference runtimes.
 

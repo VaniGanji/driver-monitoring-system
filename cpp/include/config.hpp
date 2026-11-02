@@ -38,6 +38,6 @@ namespace dms
     constexpr bool SHOW_LANDMARK_IDS = false;
     constexpr bool SHOW_LANDMARK_POINTS = true;
 
-    constexpr bool SHOW_PERFORMANCE = true;
+    constexpr bool SHOW_PERFORMANCE = false;
 
 } // namespace dms

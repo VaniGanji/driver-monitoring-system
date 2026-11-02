@@ -119,7 +119,7 @@ int main()
             }
 
             // --------------------------------------------------
-            // 1. Detect face
+            // Detect face
             // --------------------------------------------------
 
             dms::FaceDetection faceDetection;
@@ -194,7 +194,6 @@ int main()
                 // Convert ROI coordinates → frame coordinates
                 //--------------------------------------------------------
 
-                // Convert ROI-relative landmarks to full-frame coordinates.
                 std::vector<cv::Point> frameLandmarks;
                 frameLandmarks.reserve(landmarks.size());
 
@@ -216,7 +215,7 @@ int main()
                 }
 
                 // --------------------------------------------------
-                // 6. Calculate EAR & Process temporal eye state
+                // Calculate EAR & Process temporal eye state
                 // --------------------------------------------------
 
                 perf.start("eye_monitor");
@@ -270,7 +269,7 @@ int main()
                     2);
 
                 // --------------------------------------------------
-                // 10. Blink count
+                // Blink count
                 // --------------------------------------------------
 
                 cv::putText(
@@ -285,10 +284,9 @@ int main()
                     2);
 
                 // --------------------------------------------------
-                // 11. Drowsiness
+                // Drowsiness
                 // --------------------------------------------------
 
-                // Log drowsiness transitions, not every frame.
                 if (eyeState.isDrowsy && !wasDrowsy)
                 {
                     logger.logEvent("Drowsiness Detected");
@@ -337,7 +335,7 @@ int main()
                     2);
 
                 // --------------------------------------------------
-                // 12. Head direction estimation
+                // Head direction estimation
                 // --------------------------------------------------
 
                 perf.start("attention_monitor");
