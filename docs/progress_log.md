@@ -683,3 +683,91 @@ Total            : 53.457583 ms
 
 ## Observation
 - Capture time is slightly increased after Core ML enabled but FAN2 inference time is significantly reduced, resulting to doubled fps.
+
+## Project Status
+The Driver Monitoring System C++ implementation now includes:
+- ✅ Face Detection (YuNet)
+- ✅ Facial Landmark Detection (FAN2 – 68 landmarks)
+- ✅ Eye Aspect Ratio (EAR)
+- ✅ Blink Detection
+- ✅ Drowsiness Detection
+- ✅ Head Direction Estimation
+- ⚠️ Eye Gaze Estimation (not implemented)
+- ✅ Distraction Duration Monitoring
+- ✅ Audio Alert
+- ✅ Event Logging (CSV)
+- ✅ Performance Profiling & Pipeline Benchmarking
+- ✅ ONNX Runtime Integration
+- ✅ Core ML Acceleration for FAN2 Inference
+- ✅ Improved Processing Performance (~16 FPS on tested Mac)
+
+- **Known Limitation:**
+- Gaze-based attention estimation available in the Python implementation has not been ported to the C++ project.
+- Initial experiments showed that gaze estimation based on FAN2 facial landmarks did not provide sufficiently accurate results.
+- Therefore, driver attention classification in the current C++ implementation is based on head-direction estimation only.
+
+# 🚀 C++ v2.0 Release Summary
+
+## Implemented Features
+
+✓ Real-time camera capture  
+✓ Face detection using YuNet  
+✓ Facial landmark detection using FAN2 (68 landmarks)  
+✓ Eye Aspect Ratio (EAR) calculation  
+✓ Blink detection and counting  
+✓ Drowsiness detection with configurable thresholds  
+✓ Audio alert for prolonged eye closure  
+✓ Head direction estimation  
+✓ Driver attention monitoring based on head direction  
+✓ Distraction duration monitoring  
+✓ Event logging to CSV  
+✓ Performance profiling and latency measurement  
+✓ Core ML acceleration for FAN2 inference
+
+## Software Architecture
+
+The C++ implementation follows a modular design, with components for:
+
+- Camera capture
+- Face detection
+- Facial landmark detection
+- Eye monitoring
+- Attention monitoring
+- Event logging
+- Performance monitoring
+
+This separation improves readability, maintainability, and future extensibility.
+
+## Performance Observations
+
+Performance profiling on the tested Mac shows:
+
+- FAN2 inference improved from approximately **90–100 ms to 10–18 ms** after enabling the Core ML Execution Provider.
+- Overall processing performance improved from approximately **7–8 FPS to around 16 FPS**.
+- Camera capture latency was higher while FAN2 inference was active.
+- Performance figures are specific to the tested Mac and may vary on other hardware.
+
+## Engineering Highlights
+
+- Ported the core DMS pipeline from Python to Modern C++.
+- Integrated YuNet face detection and FAN2 facial landmark detection through ONNX Runtime.
+- Added Core ML Execution Provider support to accelerate FAN2 inference on macOS.
+- Implemented blink, drowsiness, and head-direction monitoring.
+- Added CSV event logging and stage-wise performance measurement.
+- Used a modular C++ architecture to separate the main processing components.
+
+## Technology Stack
+
+- Modern C++
+- OpenCV
+- ONNX Runtime
+- Core ML Execution Provider
+- YuNet
+- FAN2 (68-point facial landmarks)
+- CSV Logging
+
+## Known Limitation
+
+- Gaze-based attention estimation available in the Python implementation has not been ported to C++.
+- Initial experiments showed that gaze estimation based on FAN2 facial landmarks did not provide sufficiently accurate results.
+- Therefore, driver attention classification in the current C++ implementation is based on head-direction estimation only.
